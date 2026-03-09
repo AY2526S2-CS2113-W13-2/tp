@@ -32,5 +32,6 @@ public class RecipeBook {
     public void addRecipe(String name, ArrayList<String> ingredients, ArrayList<String> steps){
         Recipe newRecipe = new Recipe(name, ingredients, steps);
         recipes.add(newRecipe);
+        Ui.printMessage("Added recipe:\n" + newRecipe.toString());
     }
 }
