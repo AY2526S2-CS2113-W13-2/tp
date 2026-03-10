@@ -14,12 +14,12 @@ public class Parser {
     }
 
     public Command parse(String input){
-        Command C;
+        Command c;
         if(input.startsWith("delete-r")){
             int index = Integer.parseInt(input.substring(DELETE_R_PREFIX).trim());
-            C = new DeleteCommand(index);
+            c = new DeleteCommand(index);
         } else if (input.startsWith("list-r")){
-            C = new ListCommand();
+            c = new ListCommand();
         } else if (input.startsWith("add-i")) {
             String addIngredientInput = input.substring("add-i".length()).trim();
             Pattern addIngredientPattern = Pattern.compile("n/([^q/]+)\\s+q/([\\d.]+)\\s+u/(.+)");
@@ -53,7 +53,7 @@ public class Parser {
                 return new Command(false);
             }
 
-            C = new AddIngredientCommand(name, quantity, unit, ui);
+            c = new AddIngredientCommand(name, quantity, unit, ui);
         } else if (input.startsWith("add-r")) {
             ArrayList<String> ingredients = new ArrayList<>();
             ArrayList<String> steps = new ArrayList<>();
@@ -88,14 +88,14 @@ public class Parser {
                 steps.add(stripOptionalBraces(stepMatcher.group()));
             }
 
-            C = new AddRecipeCommand(name, ingredients, steps);
+            c = new AddRecipeCommand(name, ingredients, steps);
 
 
         } else {
-            C = new Command(false);
+            c = new Command(false);
             ui.printError("I don't recognise that command!");
         }
-        return C;
+        return c;
 
     }
 
