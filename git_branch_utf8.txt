@@ -1,2 +1,0 @@
-﻿* kohtzerui-AboutUs
-  master
