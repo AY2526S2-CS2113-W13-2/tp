@@ -34,11 +34,22 @@ public class DeleteRecipeCommandTest {
     }
 
     @Test
-    public void execute_invalidIndex_throwsException() {
-        DeleteRecipeCommand deleteRecipeCommand = new DeleteRecipeCommand(100);
+    public void execute_invalidIndex_recipeBookUnchanged() {
+        int sizeBefore = recipeBook.size();
 
-        assertThrows(IndexOutOfBoundsException.class, () -> {
-            deleteRecipeCommand.execute(recipeBook);
-        });
+        DeleteRecipeCommand deleteCommand = new DeleteRecipeCommand(100);
+        deleteCommand.execute(recipeBook);  // 不再抛异常，内部处理
+
+        assertEquals(sizeBefore, recipeBook.size());  // 大小不变
+    }
+
+    @Test
+    public void execute_zeroIndex_recipeBookUnchanged() {
+        int sizeBefore = recipeBook.size();
+
+        DeleteRecipeCommand deleteCommand = new DeleteRecipeCommand(0);
+        deleteCommand.execute(recipeBook);
+
+        assertEquals(sizeBefore, recipeBook.size());
     }
 }
