@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'application'
     id 'checkstyle'
+    id 'eclipse'
     id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
@@ -43,4 +44,5 @@ checkstyle {
 
 run{
     standardInput = System.in
+    enableAssertions = true
 }
