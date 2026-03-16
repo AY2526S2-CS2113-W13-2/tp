@@ -11,11 +11,18 @@ public class Ingredient {
     /**
      * Constructs an Ingredient with the specified name, quantity, and unit.
      *
-     * @param name The name of the ingredient
-     * @param quantity The quantity of the ingredient
-     * @param unit The unit of measurement
+     * @param name The name of the ingredient (must not be null or empty)
+     * @param quantity The quantity of the ingredient (must be positive)
+     * @param unit The unit of measurement (must not be null or empty)
      */
     public Ingredient(String name, double quantity, String unit) {
+        // Defensive assertions: validate pre-conditions
+        assert name != null : "Ingredient name cannot be null";
+        assert !name.trim().isEmpty() : "Ingredient name cannot be empty";
+        assert quantity > 0 : "Ingredient quantity must be positive";
+        assert unit != null : "Ingredient unit cannot be null";
+        assert !unit.trim().isEmpty() : "Ingredient unit cannot be empty";
+
         this.name = name;
         this.quantity = quantity;
         this.unit = unit;
@@ -34,6 +41,7 @@ public class Ingredient {
     }
 
     public void setQuantity(double quantity) {
+        assert quantity > 0 : "New quantity must be positive";
         this.quantity = quantity;
     }
 

@@ -5,9 +5,12 @@ import static seedu.sudocook.SudoCook.DELETE_R_PREFIX;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 public class Parser {
     private final Ui ui;
+    private static final Logger logger = Logger.getLogger(Parser.class.getName());
 
     public Parser(Ui ui) {
         this.ui = ui;
@@ -21,39 +24,59 @@ public class Parser {
         } else if (input.startsWith("list-r")){
             C = new ListCommand();
         } else if (input.startsWith("add-i")) {
-            String addIngredientInput = input.substring("add-i".length()).trim();
-            Pattern addIngredientPattern = Pattern.compile("n/([^q/]+)\\s+q/([\\d.]+)\\s+u/(.+)");
-            Matcher addIngredientMatcher = addIngredientPattern.matcher(addIngredientInput);
-
-            if (!addIngredientMatcher.matches()) {
-                ui.printError("Invalid add-i format. Use: add-i n/NAME q/QUANTITY u/UNIT");
-                return new Command(false);
-            }
-
-            String name = addIngredientMatcher.group(1).trim();
-            String quantityStr = addIngredientMatcher.group(2).trim();
-            String unit = addIngredientMatcher.group(3).trim();
-
-            // Validate name doesn't contain special characters
-            if (!name.matches("[a-zA-Z0-9\\s]+")) {
-                ui.printError("Ingredient name should not contain special characters.");
-                return new Command(false);
-            }
-
-            // Parse and validate quantity
-            double quantity;
             try {
-                quantity = Double.parseDouble(quantityStr);
-                if (quantity <= 0) {
-                    ui.printError("Quantity must be a positive number.");
+                logger.log(Level.FINE, "Parsing add-i command: " + input);
+
+                String addIngredientInput = input.substring("add-i".length()).trim();
+                Pattern addIngredientPattern = Pattern.compile("n/([^q/]+)\\s+q/([\\d.]+)\\s+u/(.+)");
+                Matcher addIngredientMatcher = addIngredientPattern.matcher(addIngredientInput);
+
+                if (!addIngredientMatcher.matches()) {
+                    String errorMsg = "Invalid add-i format. Use: add-i n/NAME q/QUANTITY u/UNIT";
+                    logger.log(Level.WARNING, "add-i format mismatch. Input: " + addIngredientInput);
+                    ui.printError(errorMsg);
                     return new Command(false);
                 }
-            } catch (NumberFormatException e) {
-                ui.printError("Invalid quantity format.");
+
+                String name = addIngredientMatcher.group(1).trim();
+                String quantityStr = addIngredientMatcher.group(2).trim();
+                String unit = addIngredientMatcher.group(3).trim();
+
+                logger.log(Level.FINE, "Extracted add-i components - name: " + name + ", quantity: " + quantityStr + ", unit: " + unit);
+
+                // Validate name doesn't contain special characters
+                if (!name.matches("[a-zA-Z0-9\\s]+")) {
+                    String errorMsg = "Ingredient name should not contain special characters.";
+                    logger.log(Level.WARNING, "Invalid ingredient name: " + name);
+                    ui.printError(errorMsg);
+                    return new Command(false);
+                }
+
+                // Parse and validate quantity
+                double quantity;
+                try {
+                    quantity = Double.parseDouble(quantityStr);
+                    if (quantity <= 0) {
+                        String errorMsg = "Quantity must be a positive number.";
+                        logger.log(Level.WARNING, "Invalid quantity: " + quantity);
+                        ui.printError(errorMsg);
+                        return new Command(false);
+                    }
+                } catch (NumberFormatException e) {
+                    String errorMsg = "Invalid quantity format: " + quantityStr;
+                    logger.log(Level.WARNING, errorMsg, e);
+                    ui.printError(errorMsg);
+                    return new Command(false);
+                }
+
+                logger.log(Level.INFO, "Successfully parsed add-i command - ingredient: " + name + " (" + quantity + " " + unit + ")");
+                C = new AddIngredientCommand(name, quantity, unit, ui);
+
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Unexpected error parsing add-i command", e);
+                ui.printError("Error processing add-i command: " + e.getMessage());
                 return new Command(false);
             }
-
-            C = new AddIngredientCommand(name, quantity, unit, ui);
         } else if (input.startsWith("add-r")) {
             ArrayList<String> ingredients = new ArrayList<>();
             ArrayList<String> steps = new ArrayList<>();
