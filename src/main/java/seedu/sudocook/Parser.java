@@ -9,20 +9,20 @@ import java.util.logging.Logger;
 import java.util.logging.Level;
 
 public class Parser {
-    private final Ui ui;
     private static final Logger logger = Logger.getLogger(Parser.class.getName());
+    private final Ui ui;
 
     public Parser(Ui ui) {
         this.ui = ui;
     }
 
     public Command parse(String input){
-        Command C;
+        Command c;
         if(input.startsWith("delete-r")){
             int index = Integer.parseInt(input.substring(DELETE_R_PREFIX).trim());
-            C = new DeleteCommand(index);
+            c = new DeleteCommand(index);
         } else if (input.startsWith("list-r")){
-            C = new ListCommand();
+            c = new ListCommand();
         } else if (input.startsWith("add-i")) {
             try {
                 logger.log(Level.FINE, "Parsing add-i command: " + input);
@@ -42,7 +42,8 @@ public class Parser {
                 String quantityStr = addIngredientMatcher.group(2).trim();
                 String unit = addIngredientMatcher.group(3).trim();
 
-                logger.log(Level.FINE, "Extracted add-i components - name: " + name + ", quantity: " + quantityStr + ", unit: " + unit);
+                logger.log(Level.FINE, "Extracted add-i components - name: " + name
+                        + ", quantity: " + quantityStr + ", unit: " + unit);
 
                 // Validate name doesn't contain special characters
                 if (!name.matches("[a-zA-Z0-9\\s]+")) {
@@ -69,8 +70,9 @@ public class Parser {
                     return new Command(false);
                 }
 
-                logger.log(Level.INFO, "Successfully parsed add-i command - ingredient: " + name + " (" + quantity + " " + unit + ")");
-                C = new AddIngredientCommand(name, quantity, unit, ui);
+                logger.log(Level.INFO, "Successfully parsed add-i command - ingredient: " + name
+                        + " (" + quantity + " " + unit + ")");
+                c = new AddIngredientCommand(name, quantity, unit, ui);
 
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Unexpected error parsing add-i command", e);
@@ -111,14 +113,14 @@ public class Parser {
                 steps.add(stripOptionalBraces(stepMatcher.group()));
             }
 
-            C = new AddRecipeCommand(name, ingredients, steps);
+            c = new AddRecipeCommand(name, ingredients, steps);
 
 
         } else {
-            C = new Command(false);
+            c = new Command(false);
             ui.printError("I don't recognise that command!");
         }
-        return C;
+        return c;
 
     }
 

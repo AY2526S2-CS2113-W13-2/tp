@@ -7,11 +7,11 @@ import java.util.logging.Level;
  * Command to add an ingredient to the inventory.
  */
 public class AddIngredientCommand extends Command {
+    private static final Logger logger = Logger.getLogger(AddIngredientCommand.class.getName());
     private final String name;
     private final double quantity;
     private final String unit;
     private final Ui ui;
-    private static final Logger logger = Logger.getLogger(AddIngredientCommand.class.getName());
 
     /**
      * Constructs an AddIngredientCommand with the specified ingredient details.

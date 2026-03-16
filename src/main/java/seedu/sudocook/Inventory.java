@@ -8,8 +8,8 @@ import java.util.logging.Level;
  * Manages the inventory of ingredients.
  */
 public class Inventory {
-    private final ArrayList<Ingredient> ingredients;
     private static final Logger logger = Logger.getLogger(Inventory.class.getName());
+    private final ArrayList<Ingredient> ingredients;
 
     public Inventory() {
         this.ingredients = new ArrayList<>();
@@ -40,7 +40,8 @@ public class Inventory {
         }
 
         ingredients.add(ingredient);
-        logger.log(Level.FINE, "Added new ingredient [" + ingredientKey + "] with quantity: " + ingredient.getQuantity());
+        logger.log(Level.FINE, "Added new ingredient [" + ingredientKey
+                + "] with quantity: " + ingredient.getQuantity());
     }
 
     /**
