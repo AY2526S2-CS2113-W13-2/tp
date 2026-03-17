@@ -14,8 +14,12 @@ public class Ui {
 
     //Formats and prints a response message wrapped between two divider lines.
     public static void formatResponse(String message) {
-        printLine();
+        System.out.println("");
         for (String line : message.split("\n")) {
+            if (line.isEmpty()) {
+                System.out.println();
+                continue;
+            }
             System.out.println(INDENT + " " + line);
         }
         printLine();

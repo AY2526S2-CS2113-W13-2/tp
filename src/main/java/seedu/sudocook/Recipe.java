@@ -6,19 +6,23 @@ public class Recipe {
     private static final String INDENT = "    ";
 
     private String name;
-    private ArrayList<String> ingredients;
+    private ArrayList<Ingredient> ingredients;
     private ArrayList<String> steps;
 
     public Recipe() {
         this.name = "Unknown Dish";
         this.ingredients = null;
         this.steps = null;
+        assert(name.equals("Unknown Dish"));
     }
 
-    public Recipe(String name, ArrayList<String> ingredients, ArrayList<String> steps) {
+    public Recipe(String name, ArrayList<Ingredient> ingredients, ArrayList<String> steps) {
         this.name = name;
         this.ingredients = ingredients;
         this.steps = steps;
+        assert(name != null);
+        assert(ingredients != null);
+        assert(steps != null);
     }
 
     public String getName() {
@@ -29,7 +33,7 @@ public class Recipe {
         return steps;
     }
 
-    public ArrayList<String> getIngredients() {
+    public ArrayList<Ingredient> getIngredients() {
         return ingredients;
     }
 
@@ -43,7 +47,7 @@ public class Recipe {
         if (ingredients.isEmpty()) {
             sb.append(INDENT + "(No ingredients listed)\n");
         } else {
-            for (String ingredient : ingredients) {
+            for (Ingredient ingredient : ingredients) {
                 sb.append(INDENT + "- ").append(ingredient).append("\n");
             }
         }

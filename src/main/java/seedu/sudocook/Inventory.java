@@ -18,7 +18,8 @@ public class Inventory {
 
     /**
      * Adds an ingredient to the inventory.
-     * If an ingredient with the same name and unit already exists, updates the quantity.
+     * If an ingredient with the same name and unit already exists, updates the
+     * quantity.
      *
      * @param ingredient The ingredient to add (must not be null)
      */
@@ -30,7 +31,7 @@ public class Inventory {
         String ingredientKey = ingredient.getName().toLowerCase() + "_" + ingredient.getUnit().toLowerCase();
 
         for (Ingredient existing : ingredients) {
-            if (existing.getName().equalsIgnoreCase(ingredient.getName()) 
+            if (existing.getName().equalsIgnoreCase(ingredient.getName())
                     && existing.getUnit().equalsIgnoreCase(ingredient.getUnit())) {
                 double newQuantity = existing.getQuantity() + ingredient.getQuantity();
                 existing.setQuantity(newQuantity);
@@ -60,5 +61,28 @@ public class Inventory {
      */
     public int size() {
         return ingredients.size();
+    }
+
+    public void removeIngredient(int index) {
+        ingredients.remove(index);
+    }
+
+    public void updateQuantity(int index, double quantityToRemove) {
+        Ingredient ingredient = ingredients.get(index);
+        double newQuantity = ingredient.getQuantity() - quantityToRemove;
+        ingredient.setQuantity(newQuantity);
+    }
+
+    public Ingredient getIngredient(int index) {
+        return ingredients.get(index);
+    }
+
+    public int findIndexByName(String name) {
+        for (int i = 0; i < ingredients.size(); i++) {
+            if (ingredients.get(i).getName().equalsIgnoreCase(name)) {
+                return i;
+            }
+        }
+        return -1;
     }
 }
