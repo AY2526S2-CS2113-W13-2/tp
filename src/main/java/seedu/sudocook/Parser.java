@@ -16,13 +16,49 @@ public class Parser {
         this.ui = ui;
     }
 
-    public Command parse(String input){
+    public Command parse(String input) {
         Command c;
-        if(input.startsWith("delete-r")){
-            int index = Integer.parseInt(input.substring(DELETE_R_PREFIX).trim());
-            c = new DeleteCommand(index);
-        } else if (input.startsWith("list-r")){
-            c = new ListCommand();
+        if (input.startsWith("delete-r")) {
+            logger.log(Level.INFO, "Received delete-r request");
+            try {
+                int index = Integer.parseInt(input.substring(DELETE_R_PREFIX).trim());
+                assert index > 0 : "Parsed index must be positive";
+                c = new DeleteRecipeCommand(index);
+            } catch (NumberFormatException e) {
+                logger.log(Level.WARNING, "Invalid index format for delete-r");
+                ui.printError("Invalid index for delete-r. Use: delete-r INDEX");
+                return new Command(false);
+            }
+        } else if (input.startsWith("list-r")) {
+            logger.log(Level.INFO, "Received list-r request");
+            c = new ListRecipeCommand();
+        } else if (input.startsWith("list-i")) {
+            c = new ListIngredientCommand(ui);
+        } else if (input.startsWith("delete-i")) {
+            String deleteInput = input.substring("delete-i".length()).trim();
+            String[] parts = deleteInput.split("\\s+");
+            if (parts.length == 0 || parts[0].isEmpty()) {
+                ui.printError("Invalid delete-i format. Use: delete-i INDEX/NAME [QUANTITY]");
+                return new Command(false);
+            }
+            if (parts.length == 1) {
+                c = new DeleteIngredientCommand(parts[0], ui);
+            } else if (parts.length == 2) {
+                try {
+                    double quantity = Double.parseDouble(parts[1]);
+                    if (quantity <= 0) {
+                        ui.printError("Quantity must be a positive number.");
+                        return new Command(false);
+                    }
+                    c = new DeleteIngredientCommand(parts[0], quantity, ui);
+                } catch (NumberFormatException e) {
+                    ui.printError("Invalid quantity for delete-i.");
+                    return new Command(false);
+                }
+            } else {
+                ui.printError("Invalid delete-i format. Use: delete-i INDEX/NAME [QUANTITY]");
+                return new Command(false);
+            }
         } else if (input.startsWith("add-i")) {
             try {
                 logger.log(Level.FINE, "Parsing add-i command: " + input);
