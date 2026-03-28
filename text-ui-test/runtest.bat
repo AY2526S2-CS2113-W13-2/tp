@@ -3,7 +3,7 @@ setlocal enableextensions
 pushd %~dp0
 
 cd ..
-call gradlew clean shadowJar
+call gradlew clean build -x test
 
 cd build\libs
 for /f "tokens=*" %%a in (
@@ -11,6 +11,9 @@ for /f "tokens=*" %%a in (
 ) do (
     set jarloc=%%a
 )
+
+REM Clean up persisted data before running test
+if exist ..\..\text-ui-test\data rmdir /s /q ..\..\text-ui-test\data
 
 java -ea -jar %jarloc% < ..\..\text-ui-test\input.txt > ..\..\text-ui-test\ACTUAL.TXT
 
