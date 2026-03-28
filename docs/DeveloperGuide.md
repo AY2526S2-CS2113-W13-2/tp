@@ -6,45 +6,56 @@
 
 ## Design & implementation
 
-### `recommend-r` — Ingredient-based Recipe Recommendation
+### `recommend-r` — Recipe Recommendation
 
 #### Overview
 
-The `recommend-r` command recommends recipes that the user can make given a specific ingredient                                                                       
-currently in their inventory. It checks that the ingredient exists in the inventory and that the
-recipe's required quantity does not exceed what is available.
+The `recommend-r` command supports two modes of recipe recommendation:
 
-**Command format:** `recommend-r n/INGREDIENT_NAME`
+- **Ingredient-based mode** (`recommend-r n/INGREDIENT_NAME`): recommends recipes that use a specific
+  ingredient, provided the inventory holds enough of it.
+- **Inventory-based mode** (`recommend-r`): recommends every recipe whose **full** ingredient list
+  can be satisfied by the current inventory — i.e. every required ingredient is present and in
+  sufficient quantity.
+
+**Command formats:**
+
+| Mode | Format | Example |
+|---|---|---|
+| Ingredient-based | `recommend-r n/INGREDIENT_NAME` | `recommend-r n/egg` |
+| Inventory-based | `recommend-r` | `recommend-r` |
 
   ---
 
 #### Implementation
 
-The feature involves four classes:
+The feature involves five classes:
 
 | Class | Role |
 |---|---|
-| `Parser` | Parses raw input, validates format, and constructs a `RecommendRecipeCommand` |
-| `RecommendRecipeCommand` | Executes the recommendation logic |
+| `Parser` | Parses raw input, selects the correct command variant, and validates format |
+| `RecommendByIngredientCommand` | Executes ingredient-based recommendation logic |
+| `RecommendByInventoryCommand` | Executes inventory-based recommendation logic |
 | `Inventory` | Provides access to current ingredient stocks |
 | `RecipeBook` | Provides access to all known recipes |
 
-**Step-by-step execution:**
+**Ingredient-based mode — step-by-step execution:**
 
 1. The user enters `recommend-r n/<ingredient>`.
-2. `Parser.parse()` verifies the `n/` prefix and extracts the ingredient name. If the format is
-   invalid or the name is empty, an error is printed and a no-op `Command` is returned.
-3. A `RecommendRecipeCommand` is constructed with the ingredient name.
-4. `SudoCook` detects the command type and calls `cmd.execute(inventory, recipes)`.
-5. Inside `execute()`:
-    - The inventory is searched linearly for a case-insensitive match. The available quantity is recorded.
+2. `Parser.parse()` detects the `n/` prefix, extracts the ingredient name, and constructs a
+   `RecommendByIngredientCommand`. If the format is invalid or the name is empty, an error is printed and
+   a no-op `Command` is returned.
+3. `SudoCook` calls `cmd.execute(inventory, recipes)`.
+4. Inside `execute()`:
+    - The inventory is searched linearly for a case-insensitive name match. The available quantity
+      is recorded.
     - If the ingredient is not found, `Ui.printError()` is called and execution stops.
     - Otherwise, each recipe in `RecipeBook` is inspected. A recipe qualifies if it contains the
       ingredient **and** requires a quantity ≤ the available amount.
     - If no recipe qualifies, a "No recipes meet the requirement" message is printed; otherwise the
       list of matching recipe names is printed.
 
-Key snippet from `RecommendRecipeCommand`:
+Key snippet from `RecommendByIngredientCommand`:
 
 ```text
   for (int i = 0; i < recipes.size(); i++) {
@@ -62,15 +73,72 @@ Key snippet from `RecommendRecipeCommand`:
 
   ---
 
-#### Sequence Diagram
+**Inventory-based mode — step-by-step execution:**
 
-![Recommend Recipe Sequence Diagram](team/RecommendSD-0.png)
+1. The user enters `recommend-r` (no arguments).
+2. `Parser.parse()` detects the absence of arguments and constructs a
+   `RecommendByInventoryCommand`.
+3. `SudoCook` calls `cmd.execute(inventory, recipes)`.
+4. Inside `execute()`, each recipe is evaluated by `canMake(recipe, inventory)`:
+    - For every ingredient required by the recipe, the inventory is searched for a
+      case-insensitive name match.
+    - If the ingredient is absent or the available quantity is less than required, `canMake`
+      returns `false` and the recipe is excluded.
+    - If all ingredients pass, `canMake` returns `true` and the recipe is appended to the result. 
+    - If no recipe is makeable, a "No recipes can be made" message is printed; otherwise the list of 
+      makeable recipe names is printed.
 
-*Figure 1: Sequence Diagram for the `recommend-r` command*
+Key snippet from `RecommendByInventoryCommand`:
+
+```text
+  private boolean canMake(Recipe recipe, Inventory inventory) {
+      for (Ingredient required : recipe.getIngredients()) {
+          double available = -1;
+          for (int j = 0; j < inventory.size(); j++) {
+              Ingredient item = inventory.getIngredient(j);
+              if (item.getName().equalsIgnoreCase(required.getName())) {
+                  available = item.getQuantity();
+                  break;
+              }
+          }
+          if (available < required.getQuantity()) {
+              return false;
+          }
+      }
+      return true;
+  }
+```
+
+  ---
+
+#### Sequence Diagrams
+
+![Recommend Recipe Sequence Diagram](team/RecommendSD.png)
+
+*Figure 1: Sequence Diagram for `recommend-r n/INGREDIENT_NAME` (ingredient-based mode)*
+
+<br>
+<br>
+
+![Recommend By Inventory Sequence Diagram](team/RecommendByInventorySD.png)
+
+*Figure 2: Sequence Diagram for `recommend-r` (inventory-based mode)*
 
   ---
 
 #### Design Considerations
+
+**Aspect: Two modes under one command vs. separate commands**
+
+| Option | Pros | Cons |
+|---|---|---|
+| Single `recommend-r` command with optional `n/` argument (current) | Consistent command prefix; easier to discover both modes via `help` | Slightly more complex parsing logic |
+| Separate commands (e.g. `recommend-r` and `recommend-all`) | Fully independent; no shared parsing | More commands for the user to remember |
+
+*Decision:* Keeping both modes under `recommend-r` provides a natural extension of the existing
+command and keeps the help output concise.
+
+  ---
 
 **Aspect: Case sensitivity of ingredient matching**
 
@@ -151,6 +219,71 @@ Both commands delegate to `RecipeBook` via `ListRecipeCommand` and `ViewRecipeCo
 | Single command always showing full details | Fewer commands | Clutters output when the user only wants a name reminder |
 
 *Decision:* Splitting the commands keeps everyday browsing fast while still allowing full detail inspection when needed.
+
+---
+
+### `delete-r` — Delete a Recipe
+
+#### Overview
+
+The `delete-r` command permanently removes a recipe from the recipe book by its 1-based index.
+
+**Command format:** `delete-r INDEX`
+
+  ---
+
+#### Implementation
+
+The feature involves three classes:
+
+| Class | Role |
+|---|---|
+| `Parser` | Parses raw input, validates that the index is a number, and constructs a `DeleteRecipeCommand` |
+| `DeleteRecipeCommand` | Calls `RecipeBook.removeRecipe()` with the given index |
+| `RecipeBook` | Validates the index range and performs the removal |
+
+**Step-by-step execution:**
+
+1. The user enters `delete-r <index>`.
+2. `Parser.parse()` detects the `delete-r` prefix and extracts the index using the constant
+   `DELETE_R_PREFIX` (= 8, the length of `"delete-r"`).
+3. The extracted string is parsed as an integer. If it is not a valid number, an error is printed
+   and a no-op `Command` is returned.
+4. A `DeleteRecipeCommand` is constructed with the 1-based index.
+5. `SudoCook` routes the command to `cmd.execute(recipes)`.
+6. Inside `execute()`:
+    - `RecipeBook.removeRecipe(index)` is called.
+    - If the index is outside the valid range (1 to size), an `IndexOutOfBoundsException` is
+      thrown, caught, and reported via `Ui.printMessage()`.
+    - If the index is valid, the recipe is removed (converting to 0-based internally with
+      `recipes.remove(index - 1)`) and a success message is printed.
+
+Key snippet from `RecipeBook`:
+
+```text
+  public void removeRecipe(int index) {
+      if (index < 1 || index > recipes.size()) {
+          throw new IndexOutOfBoundsException(
+                  "Index " + index + " is out of range. Valid range: 1 to " + recipes.size()
+          );
+      }
+      recipes.remove(index - 1);
+  }
+```
+
+  ---
+
+#### Design Considerations
+
+**Aspect: Index convention (1-based vs 0-based)**
+
+| Option | Pros | Cons |
+|---|---|---|
+| 1-based user input (current) | Matches the numbered list shown by `list-r` and `view-r` | Requires `index - 1` conversion before `ArrayList.remove()` |
+| 0-based user input | Aligns directly with internal storage | Counter-intuitive; users see 1-based numbering in list output |
+
+*Decision:* 1-based indexing is used to stay consistent with `list-r` and `view-r` output, so the
+index the user sees is the same index they use to delete.
 
 ---
 

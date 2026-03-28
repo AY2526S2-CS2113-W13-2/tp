@@ -9,7 +9,7 @@ skinparam MaxMessageSize 150
 actor User
 participant ":SudoCook" as SudoCook
 participant ":Parser" as Parser
-participant "cmd:RecommendByIngredientCommand" as Cmd
+participant "cmd:RecommendByInventoryCommand" as Cmd
 participant "inventory:Inventory" as Inventory
 participant "recipes:RecipeBook" as RecipeBook
 participant "recipe:Recipe" as Recipe
@@ -18,11 +18,11 @@ participant ":Ui" as Ui
 User -> SudoCook : run()
 activate SudoCook
 
-SudoCook -> Parser : parse("recommend-r n/beef")
+SudoCook -> Parser : parse("recommend-r")
 activate Parser
 
 create Cmd
-Parser -> Cmd ** : RecommendByIngredientCommand("beef")
+Parser -> Cmd ** : RecommendByInventoryCommand()
 activate Cmd
 Cmd --> Parser
 deactivate Cmd
@@ -33,14 +33,6 @@ deactivate Parser
 SudoCook -> Cmd : execute(inventory, recipes)
 activate Cmd
 
-loop for each ingredient in inventory
-    Cmd -> Inventory : getIngredient(i)
-    activate Inventory
-    Inventory --> Cmd : ingredient
-    deactivate Inventory
-    note right of Cmd : If name matches,\nrecord amount
-end
-
 loop for each recipe in recipes
     Cmd -> RecipeBook : getRecipe(i)
     activate RecipeBook
@@ -49,10 +41,17 @@ loop for each recipe in recipes
 
     Cmd -> Recipe : getIngredients()
     activate Recipe
-    Recipe --> Cmd : ingredientList
+    Recipe --> Cmd : requiredIngredients
     deactivate Recipe
 
-    note right of Cmd : If ingredient exists in recipe\nAND quantity <= amount,\nappend to list
+    loop for each required ingredient in recipe
+        Cmd -> Inventory : getIngredient(j)
+        activate Inventory
+        Inventory --> Cmd : item
+        deactivate Inventory
+        note right of Cmd : Case-insensitive name match;\nif available < required, recipe\nis excluded immediately
+    end
+    note right of Cmd : If all ingredients pass,\nappend recipe to result list
 end
 
 Cmd -> Ui : printMessage(resultString)
