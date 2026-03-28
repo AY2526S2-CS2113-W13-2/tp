@@ -222,6 +222,71 @@ Both commands delegate to `RecipeBook` via `ListRecipeCommand` and `ViewRecipeCo
 
 ---
 
+### `delete-r` — Delete a Recipe
+
+#### Overview
+
+The `delete-r` command permanently removes a recipe from the recipe book by its 1-based index.
+
+**Command format:** `delete-r INDEX`
+
+  ---
+
+#### Implementation
+
+The feature involves three classes:
+
+| Class | Role |
+|---|---|
+| `Parser` | Parses raw input, validates that the index is a number, and constructs a `DeleteRecipeCommand` |
+| `DeleteRecipeCommand` | Calls `RecipeBook.removeRecipe()` with the given index |
+| `RecipeBook` | Validates the index range and performs the removal |
+
+**Step-by-step execution:**
+
+1. The user enters `delete-r <index>`.
+2. `Parser.parse()` detects the `delete-r` prefix and extracts the index using the constant
+   `DELETE_R_PREFIX` (= 8, the length of `"delete-r"`).
+3. The extracted string is parsed as an integer. If it is not a valid number, an error is printed
+   and a no-op `Command` is returned.
+4. A `DeleteRecipeCommand` is constructed with the 1-based index.
+5. `SudoCook` routes the command to `cmd.execute(recipes)`.
+6. Inside `execute()`:
+    - `RecipeBook.removeRecipe(index)` is called.
+    - If the index is outside the valid range (1 to size), an `IndexOutOfBoundsException` is
+      thrown, caught, and reported via `Ui.printMessage()`.
+    - If the index is valid, the recipe is removed (converting to 0-based internally with
+      `recipes.remove(index - 1)`) and a success message is printed.
+
+Key snippet from `RecipeBook`:
+
+```text
+  public void removeRecipe(int index) {
+      if (index < 1 || index > recipes.size()) {
+          throw new IndexOutOfBoundsException(
+                  "Index " + index + " is out of range. Valid range: 1 to " + recipes.size()
+          );
+      }
+      recipes.remove(index - 1);
+  }
+```
+
+  ---
+
+#### Design Considerations
+
+**Aspect: Index convention (1-based vs 0-based)**
+
+| Option | Pros | Cons |
+|---|---|---|
+| 1-based user input (current) | Matches the numbered list shown by `list-r` and `view-r` | Requires `index - 1` conversion before `ArrayList.remove()` |
+| 0-based user input | Aligns directly with internal storage | Counter-intuitive; users see 1-based numbering in list output |
+
+*Decision:* 1-based indexing is used to stay consistent with `list-r` and `view-r` output, so the
+index the user sees is the same index they use to delete.
+
+---
+
 ### `cook` - Cook a Recipe
 
 #### Overview

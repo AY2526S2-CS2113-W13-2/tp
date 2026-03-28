@@ -12,25 +12,7 @@
 1. Ensure that you have Java 17 or above installed.
 1. Down the latest version of `Duke` from [here](http://link.to/duke).
 
-## Features 
-
-{Give detailed description of each feature}
-
-### Adding a todo: `todo`
-Adds a new item to the list of todo items.
-
-Format: `todo n/TODO_NAME d/DEADLINE`
-
-* The `DEADLINE` can be in a natural language format.
-* The `TODO_NAME` cannot contain punctuation.
-
-Example of usage:
-
-`todo n/Write the rest of the User Guide d/next week`
-
-`todo n/Refactor the User Guide to remove passive voice d/13/04/2020`
-
----
+## Features
 
 ### Recommending recipes: `recommend-r`
 
@@ -39,7 +21,7 @@ The `recommend-r` command has two modes:
 - **Ingredient-based** — finds recipes that use a specific ingredient you already have enough of.
 - **Inventory-based** — finds every recipe that can be fully made using your current inventory.
 
----
+<br>
 
 #### Ingredient-based recommendation
 
@@ -74,7 +56,7 @@ Expected output (ingredient in inventory but no recipe uses enough of it):
 No recipes meet the requirement
 ```
 
----
+<br>
 
 #### Inventory-based recommendation
 
@@ -100,6 +82,41 @@ Expected output (no recipe can be fully made):
 ```
 No recipes can be made with the current inventory.
 ```
+
+---
+
+### Deleting a recipe: `delete-r`
+
+Removes a recipe from the recipe book by its index.
+
+Format: `delete-r INDEX`
+
+* `INDEX` must be a positive integer corresponding to the recipe's position in the recipe list.
+* Use `list-r` first to confirm the index of the recipe you want to delete.
+* The deletion cannot be undone.
+
+Examples:
+
+`delete-r 1`
+
+`delete-r 3`
+
+Expected output (successful deletion):
+```
+Recipe 1 deleted successfully.
+```
+
+Expected output (index out of range):
+```
+Invalid index: Index 5 is out of range. Valid range: 1 to 3
+```
+
+Expected output (non-numeric index):
+```
+Oops! Invalid index for delete-r. Use: delete-r INDEX
+```
+
+---
 
 ## FAQ
 
