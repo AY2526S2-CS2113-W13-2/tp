@@ -65,6 +65,11 @@ public class SudoCook {
             } else if (cmd instanceof RecommendRecipeCommand) {
                 logger.log(Level.FINE, "Routing recommend command");
                 cmd.execute(inventory, recipes);
+            } else if (cmd instanceof SortInventoryCommand){
+                logger.log(Level.FINE, "Routing sort inventory command");
+                cmd.execute(inventory);
+                Command _listCommand = new ListIngredientCommand();
+                _listCommand.execute(inventory);
             } else {
                 logger.log(Level.FINE, "Routing command to RecipeBook");
                 cmd.execute(recipes);

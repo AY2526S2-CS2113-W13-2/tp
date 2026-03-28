@@ -244,6 +244,10 @@ public class Parser {
                 Ui.printError("You should indicate the index of the recipe when cooking!");
                 c = new Command(false);
             }
+        } else if (input.startsWith("sort-i")){
+            logger.log(Level.INFO, "Received sort-i request");
+            c = new SortInventoryCommand(false);
+            return c;
         } else if (input.trim().equalsIgnoreCase("help")) {
             c = new HelpCommand();
         } else {
