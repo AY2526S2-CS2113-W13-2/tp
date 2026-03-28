@@ -1,6 +1,8 @@
 package seedu.sudocook;
 
-import java.util.Scanner;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import seedu.sudocook.util.AnsiColor;
 
 
@@ -10,7 +12,7 @@ public class Ui {
     private static final String INDENT = "    ";
 
     // Instance variables after static variables
-    private final Scanner scanner = new Scanner(System.in);
+    private final BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
     public static void printLine() {
         System.out.println(INDENT + AnsiColor.cyan(DIVIDER));
@@ -80,10 +82,15 @@ public class Ui {
     }
 
     public String readInput() {
-        System.out.print(INDENT + "> ");
-        if (scanner.hasNextLine()) {
-            return scanner.nextLine().trim();
-        } else {
+        try {
+            System.out.print(INDENT + "> ");
+            String line = in.readLine();
+            if (line == null) {
+                // EOF reached (e.g., during IO redirection tests)
+                return "bye";
+            }
+            return line.trim();
+        } catch (IOException e) {
             return "bye";
         }
     }
