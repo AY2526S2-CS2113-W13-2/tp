@@ -331,6 +331,98 @@ surfaces ingredients that should be used sooner.
 *Decision:* The sorting logic is kept in `Inventory` so command classes remain focused on
 triggering behaviour rather than manipulating internal data structures directly.
 
+### `list-i` - List Inventory Ingredients
+
+#### Overview
+
+The `list-i` command displays the ingredients currently stored in the inventory. It supports two
+variants: listing all ingredients, or listing only ingredients whose expiry date is before a given
+cutoff.
+
+**Command formats:**
+- `list-i`
+- `list-i ex/YYYY-MM-DD`
+
+  ---
+
+#### Implementation
+
+The feature involves four main classes:
+
+| Class | Role |
+|---|---|
+| `Parser` | Detects the `list-i` prefix, validates the optional expiry cutoff, and constructs a `ListIngredientCommand` |
+| `ListIngredientCommand` | Retrieves the ingredients to display, optionally filters them, and builds the output |
+| `Inventory` | Provides the stored ingredient list |
+| `Ui` | Displays either the ingredient list or an empty-state message |
+
+**Step-by-step execution:**
+
+1. The user enters either `list-i` or `list-i ex/<date>`.
+2. `Parser.parse()` detects the `list-i` prefix.
+3. If no additional argument is provided, `Parser` constructs `new ListIngredientCommand()`.
+4. If an expiry cutoff is provided, `Parser` validates the `ex/YYYY-MM-DD` format, parses the date,
+   and constructs `new ListIngredientCommand(expiryDate)`.
+5. If the format or date is invalid, an error is printed and a no-op `Command` is returned.
+6. `SudoCook` detects the command type and calls `cmd.execute(inventory)`.
+7. Inside `execute()`:
+    - `Inventory.getIngredients()` is called to retrieve the stored ingredients.
+    - If an expiry cutoff exists, ingredients are filtered to those with a non-null expiry date
+      before the cutoff.
+    - If the resulting list is empty, `Ui.printMessage()` prints an empty-state message.
+    - Otherwise, a numbered list with the appropriate header is built and printed.
+
+Key snippet from `ListIngredientCommand`:
+
+```text
+  ArrayList<Ingredient> ingredients = inventory.getIngredients();
+  if (expiry == null) {
+      return ingredients;
+  }
+
+  ArrayList<Ingredient> filteredIngredients = new ArrayList<>();
+  for (Ingredient ingredient : ingredients) {
+      LocalDate ingredientExpiry = ingredient.getExpiryDate();
+      if (ingredientExpiry != null && ingredientExpiry.isBefore(expiry)) {
+          filteredIngredients.add(ingredient);
+      }
+  }
+```
+
+  ---
+
+#### Sequence Diagram
+
+![List Ingredients Sequence Diagram](team/ListIngredients.png)
+
+*Figure 4: Sequence Diagram for the `list-i` command*
+
+  ---
+
+#### Design Considerations
+
+**Aspect: Supporting filtered and unfiltered listing**
+
+| Option | Pros | Cons |
+|---|---|---|
+| Single command with an optional expiry cutoff (current) | Keeps the interface compact; both variants share the same execution path | Parser logic is slightly more complex |
+| Separate commands for full listing and filtered listing | Simpler parsing per command | Adds another command for users to remember |
+
+*Decision:* A single command with an optional cutoff keeps the user interface smaller while still
+covering both use cases.
+
+  ---
+
+**Aspect: Handling ingredients without expiry dates in filtered mode**
+
+| Option | Pros | Cons |
+|---|---|---|
+| Exclude ingredients with `null` expiry dates (current) | Keeps the filtered result precise; avoids guessing how undated items should compare | Undated ingredients never appear in cutoff-based results |
+| Include ingredients with `null` expiry dates | Ensures no ingredient is hidden | Makes "expiring before" results less accurate |
+
+*Decision:* Ingredients without expiry dates are excluded in cutoff mode because the filter is
+intended to show only items known to expire before the requested date.
+
 
 ## Product scope
 ### Target user profile
