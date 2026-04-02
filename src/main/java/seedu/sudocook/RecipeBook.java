@@ -66,8 +66,8 @@ public class RecipeBook {
         Ui.printGradientMessage(recipes.get(index - 1).toString().stripLeading());
     }
 
-    public void addRecipe(String name, ArrayList<Ingredient> ingredients, ArrayList<String> steps, int time){
-        Recipe newRecipe = new Recipe(name, ingredients, steps, time);
+    public void addRecipe(String name, ArrayList<Ingredient> ingredients, ArrayList<String> steps, int time, int calories){
+        Recipe newRecipe = new Recipe(name, ingredients, steps, time, calories);
         recipes.add(newRecipe);
         Ui.printGradientMessage("Added recipe:\n" + newRecipe.toString());
     }
@@ -77,11 +77,14 @@ public class RecipeBook {
         Ui.printGradientMessage("Added recipe:\n" + recipe.toString());
     }
 
-    public void filterRecipes(Integer maxTime) {
+    public void filterRecipes(Integer maxTime, Integer maxCalories) {
         ArrayList<Recipe> filtered = new ArrayList<>();
         for (Recipe r : recipes) {
             boolean keep = true;
             if (maxTime != null && r.getTime() > maxTime) {
+                keep = false;
+            }
+            if (maxCalories != null && r.getCalories() > maxCalories) {
                 keep = false;
             }
             if (keep) {

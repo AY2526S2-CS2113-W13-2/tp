@@ -101,7 +101,6 @@ public class UiTest {
     @Test
     public void readInput_eofReturnsBye() {
         System.setIn(new ByteArrayInputStream(new byte[0]));
-        Ui ui = new Ui();
         // When there's no input, readInput should return "bye"
         // We need a fresh Ui with the new stdin
         Ui freshUi = new Ui();
