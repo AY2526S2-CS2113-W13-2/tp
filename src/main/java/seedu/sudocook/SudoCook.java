@@ -57,7 +57,7 @@ public class SudoCook {
             if (cmd instanceof UndoCommand) {
                 logger.log(Level.FINE, "Routing undo command");
                 ((UndoCommand) cmd).execute(history, recipes, inventory);
-            if (cmd instanceof SearchIngredientCommand) {
+            } else if (cmd instanceof SearchIngredientCommand) {
                 logger.log(Level.FINE, "Routing search-i command to Inventory");
                 cmd.execute(inventory);
             } else if (cmd instanceof AddIngredientCommand ||
