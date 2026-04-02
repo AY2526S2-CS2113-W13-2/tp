@@ -9,23 +9,30 @@ public class Recipe {
     private ArrayList<Ingredient> ingredients;
     private ArrayList<String> steps;
     private int time;
+    private int calories;
 
     public Recipe() {
         this.name = "Unknown Dish";
         this.ingredients = null;
         this.steps = null;
         this.time = 0;
+        this.calories = 0;
         assert(name.equals("Unknown Dish"));
     }
 
-    public Recipe(String name, ArrayList<Ingredient> ingredients, ArrayList<String> steps, int time) {
+    public Recipe(String name, ArrayList<Ingredient> ingredients, ArrayList<String> steps, int time, int calories) {
         this.name = name;
         this.ingredients = ingredients;
         this.steps = steps;
         this.time = time;
+        this.calories = calories;
         assert(name != null);
         assert(ingredients != null);
         assert(steps != null);
+    }
+
+    public Recipe(String name, ArrayList<Ingredient> ingredients, ArrayList<String> steps, int time) {
+        this(name, ingredients, steps, time, 0);
     }
 
     public String getName() {
@@ -34,6 +41,10 @@ public class Recipe {
 
     public int getTime() {
         return time;
+    }
+
+    public int getCalories() {
+        return calories;
     }
 
     public ArrayList<String> getSteps() {
@@ -50,6 +61,7 @@ public class Recipe {
 
         sb.append("Recipe Name: ").append(name).append("\n");
         sb.append("Preparation Time: ").append(time).append(" minutes\n");
+        sb.append("Calories: ").append(calories).append(" kcal\n");
 
         sb.append("\n").append(Ui.CYAN).append(INDENT).append("Ingredients:").append(Ui.RESET).append("\n");
         if (ingredients.isEmpty()) {

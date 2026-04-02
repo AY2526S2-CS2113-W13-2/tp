@@ -64,14 +64,14 @@ public class ViewRecipeCommandTest {
     // --- FilterRecipeCommand ---
     @Test
     public void filterRecipeCommand_matchingTime_showsRecipe() {
-        FilterRecipeCommand cmd = new FilterRecipeCommand(30);
+        FilterRecipeCommand cmd = new FilterRecipeCommand(30, null);
         cmd.execute(recipeBook);
         assertTrue(getOutput().contains("TestRecipe"));
     }
 
     @Test
     public void filterRecipeCommand_tooLowTime_showsNoResults() {
-        FilterRecipeCommand cmd = new FilterRecipeCommand(1);
+        FilterRecipeCommand cmd = new FilterRecipeCommand(1, null);
         cmd.execute(recipeBook);
         assertTrue(getOutput().contains("No recipes found matching"));
     }

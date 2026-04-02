@@ -10,9 +10,12 @@ public class RecipeBook {
     }
 
     public void removeRecipe(int index) {
+        if (recipes.isEmpty()) {
+            throw new IndexOutOfBoundsException("The recipe book is currently empty.");
+        }
         if (index < 1 || index > recipes.size()) {
             throw new IndexOutOfBoundsException(
-                    "Index " + index + " is out of range. Valid range: 1 to " + recipes.size()
+                    "Index " + index + " is out of range. (Valid range: 1 to " + recipes.size() + ")"
             );
         }
         recipes.remove(index - 1);
@@ -59,15 +62,20 @@ public class RecipeBook {
     }
 
     public void viewRecipe(int index) {
+        if (recipes.isEmpty()) {
+            Ui.printError("The recipe book is currently empty.");
+            return;
+        }
         if (index < 1 || index > recipes.size()) {
-            Ui.printError("Index " + index + " is out of range. Valid range: 1 to " + recipes.size());
+            Ui.printError("Index " + index + " is out of range. (Valid range: 1 to " + recipes.size() + ")");
             return;
         }
         Ui.printGradientMessage(recipes.get(index - 1).toString().stripLeading());
     }
 
-    public void addRecipe(String name, ArrayList<Ingredient> ingredients, ArrayList<String> steps, int time){
-        Recipe newRecipe = new Recipe(name, ingredients, steps, time);
+    public void addRecipe(String name, ArrayList<Ingredient> ingredients,
+            ArrayList<String> steps, int time, int calories) {
+        Recipe newRecipe = new Recipe(name, ingredients, steps, time, calories);
         recipes.add(newRecipe);
         Ui.printGradientMessage("Added recipe:\n" + newRecipe.toString());
     }
@@ -77,11 +85,14 @@ public class RecipeBook {
         Ui.printGradientMessage("Added recipe:\n" + recipe.toString());
     }
 
-    public void filterRecipes(Integer maxTime) {
+    public void filterRecipes(Integer maxTime, Integer maxCalories) {
         ArrayList<Recipe> filtered = new ArrayList<>();
         for (Recipe r : recipes) {
             boolean keep = true;
             if (maxTime != null && r.getTime() > maxTime) {
+                keep = false;
+            }
+            if (maxCalories != null && r.getCalories() > maxCalories) {
                 keep = false;
             }
             if (keep) {

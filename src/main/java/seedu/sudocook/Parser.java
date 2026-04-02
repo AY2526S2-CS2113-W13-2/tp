@@ -187,11 +187,11 @@ public class Parser {
             ArrayList<Ingredient> ingredients = new ArrayList<>();
             ArrayList<String> steps = new ArrayList<>();
             String addRecipeInput = input.substring("add-r".length()).trim();
-            Pattern addRecipePattern = Pattern.compile("^(.*?)\\s+i/(.+?)\\s+s/(.+?)\\s+t/(\\d+)$");
+            Pattern addRecipePattern = Pattern.compile("^(.*?)\\s+i/(.+?)\\s+s/(.+?)\\s+t/(\\d+)\\s+c/(\\d+)$");
             Matcher addRecipeMatcher = addRecipePattern.matcher(addRecipeInput);
 
             if (!addRecipeMatcher.matches()) {
-                Ui.printError("Invalid add-r format.");
+                Ui.printError("Invalid add-r format. Use: add-r NAME i/INGREDIENTS s/STEPS t/TIME c/CALORIES");
                 logger.log(Level.INFO, "Caught invalid add-r command format");
                 return new Command(false);
             }
@@ -200,12 +200,19 @@ public class Parser {
             String ingredientInput = addRecipeMatcher.group(2).trim();
             String stepInput = addRecipeMatcher.group(3).trim();
             String timeInput = addRecipeMatcher.group(4).trim();
+            String calorieInput = addRecipeMatcher.group(5).trim();
             int time;
+            int calories;
             try {
                 time = Integer.parseInt(timeInput);
+                calories = Integer.parseInt(calorieInput);
+                if (time < 0 || calories < 0) {
+                    Ui.printError("Time and calories cannot be negative.");
+                    return new Command(false);
+                }
             } catch (NumberFormatException e) {
-                Ui.printError("Invalid add-r format. Time should be an integer.");
-                logger.log(Level.INFO, "Caught invalid add-r command format in TIME field");
+                Ui.printError("Invalid add-r format. Time and calories should be integers.");
+                logger.log(Level.INFO, "Caught invalid add-r command format in numeric fields");
                 return new Command(false);
             }
 
@@ -244,31 +251,43 @@ public class Parser {
                 steps.add(stripOptionalBraces(stepMatcher.group()));
             }
 
-            c = new AddRecipeCommand(name, ingredients, steps, time);
+            c = new AddRecipeCommand(name, ingredients, steps, time, calories);
 
         } else if (input.startsWith("filter-r")) {
             logger.log(Level.INFO, "Received filter-r request");
             String filterInput = input.substring("filter-r".length()).trim();
 
             Integer maxTime = null;
-            Pattern filterPattern = Pattern.compile("t/(\\d+)");
-            Matcher filterMatcher = filterPattern.matcher(filterInput);
+            Integer maxCalories = null;
 
-            if (filterMatcher.find()) {
+            Pattern timePattern = Pattern.compile("t/(\\d+)");
+            Matcher timeMatcher = timePattern.matcher(filterInput);
+            if (timeMatcher.find()) {
                 try {
-                    maxTime = Integer.parseInt(filterMatcher.group(1));
+                    maxTime = Integer.parseInt(timeMatcher.group(1));
                 } catch (NumberFormatException e) {
                     Ui.printError("Invalid time format for filter-r.");
                     return new Command(false);
                 }
             }
 
-            if (maxTime == null) {
-                Ui.printError("No valid filter targets provided. Use: filter-r t/MAX_TIME");
+            Pattern caloriePattern = Pattern.compile("c/(\\d+)");
+            Matcher calorieMatcher = caloriePattern.matcher(filterInput);
+            if (calorieMatcher.find()) {
+                try {
+                    maxCalories = Integer.parseInt(calorieMatcher.group(1));
+                } catch (NumberFormatException e) {
+                    Ui.printError("Invalid calorie format for filter-r.");
+                    return new Command(false);
+                }
+            }
+
+            if (maxTime == null && maxCalories == null) {
+                Ui.printError("No valid filter targets provided. Use: filter-r [t/MAX_TIME] [c/MAX_CALORIES]");
                 return new Command(false);
             }
 
-            c = new FilterRecipeCommand(maxTime);
+            c = new FilterRecipeCommand(maxTime, maxCalories);
 
         } else if (input.startsWith("cook")) {
             logger.log(Level.INFO, "Received cook-r request");

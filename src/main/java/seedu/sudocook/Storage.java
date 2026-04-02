@@ -132,6 +132,7 @@ public class Storage {
                 }
                 recipeObj.put("steps", stepList);
                 recipeObj.put("time", recipe.getTime());
+                recipeObj.put("calories", recipe.getCalories());
                 recipeList.put(recipeObj);
             }
 
@@ -187,7 +188,8 @@ public class Storage {
                 }
 
                 int time = recipeObj.optInt("time", 0);
-                recipeBook.addRecipe(new Recipe(name, ingredients, steps, time));
+                int calories = recipeObj.optInt("calories", 0);
+                recipeBook.addRecipe(new Recipe(name, ingredients, steps, time, calories));
             }
             logger.log(Level.INFO, "Recipes loaded successfully");
         } catch (IOException e) {
