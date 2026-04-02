@@ -7,21 +7,15 @@ public class RecipeBook {
 
     public RecipeBook() {
         this.recipes = new ArrayList<>();
-        /*Test Purpose*/
-        ArrayList<Ingredient> testIngs = new ArrayList<>();
-        ArrayList<String> testSteps = new ArrayList<>();
-        testIngs.add(new Ingredient("Water", 1, "Liter"));
-        testIngs.add(new Ingredient("Sugar", 1, "mg"));
-        testSteps.add("Pour MIXUE into pot");
-        testSteps.add("Heat the pot");
-        testSteps.add("Drink with your extraordinary courage");
-        recipes.add(new Recipe("Mixue", testIngs, testSteps, 5));
     }
 
     public void removeRecipe(int index) {
+        if (recipes.isEmpty()) {
+            throw new IndexOutOfBoundsException("The recipe book is currently empty.");
+        }
         if (index < 1 || index > recipes.size()) {
             throw new IndexOutOfBoundsException(
-                    "Index " + index + " is out of range. Valid range: 1 to " + recipes.size()
+                    "Index " + index + " is out of range. (Valid range: 1 to " + recipes.size() + ")"
             );
         }
         recipes.remove(index - 1);
@@ -44,6 +38,21 @@ public class RecipeBook {
         }
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < recipes.size(); i++) {
+            sb.append(i + 1).append(". ").append(recipes.get(i).getName());
+            if (i < recipes.size() - 1) {
+                sb.append("\n");
+            }
+        }
+        Ui.printGradientMessage(sb.toString());
+    }
+
+    public void viewRecipe() {
+        if (recipes.isEmpty()) {
+            Ui.printMessage("No recipes found.");
+            return;
+        }
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < recipes.size(); i++) {
             sb.append(i + 1).append(". ").append(recipes.get(i).toString().stripLeading());
             if (i < recipes.size() - 1) {
                 sb.append("\n");
@@ -52,8 +61,21 @@ public class RecipeBook {
         Ui.printGradientMessage(sb.toString());
     }
 
-    public void addRecipe(String name, ArrayList<Ingredient> ingredients, ArrayList<String> steps, int time){
-        Recipe newRecipe = new Recipe(name, ingredients, steps, time);
+    public void viewRecipe(int index) {
+        if (recipes.isEmpty()) {
+            Ui.printError("The recipe book is currently empty.");
+            return;
+        }
+        if (index < 1 || index > recipes.size()) {
+            Ui.printError("Index " + index + " is out of range. (Valid range: 1 to " + recipes.size() + ")");
+            return;
+        }
+        Ui.printGradientMessage(recipes.get(index - 1).toString().stripLeading());
+    }
+
+    public void addRecipe(String name, ArrayList<Ingredient> ingredients,
+            ArrayList<String> steps, int time, int calories) {
+        Recipe newRecipe = new Recipe(name, ingredients, steps, time, calories);
         recipes.add(newRecipe);
         Ui.printGradientMessage("Added recipe:\n" + newRecipe.toString());
     }
@@ -63,11 +85,14 @@ public class RecipeBook {
         Ui.printGradientMessage("Added recipe:\n" + recipe.toString());
     }
 
-    public void filterRecipes(Integer maxTime) {
+    public void filterRecipes(Integer maxTime, Integer maxCalories) {
         ArrayList<Recipe> filtered = new ArrayList<>();
         for (Recipe r : recipes) {
             boolean keep = true;
             if (maxTime != null && r.getTime() > maxTime) {
+                keep = false;
+            }
+            if (maxCalories != null && r.getCalories() > maxCalories) {
                 keep = false;
             }
             if (keep) {
@@ -87,6 +112,27 @@ public class RecipeBook {
             }
         }
         Ui.printGradientMessage(sb.toString());
+    }
+
+    public void searchRecipes(String query) {
+        if (recipes.isEmpty()) {
+            Ui.printMessage("No recipes found.");
+            return;
+        }
+        StringBuilder sb = new StringBuilder();
+        int count = 0;
+        for (int i = 0; i < recipes.size(); i++) {
+            if (FuzzySearch.isMatch(query, recipes.get(i).getName())) {
+                count++;
+                sb.append(i + 1).append(". ").append(recipes.get(i).getName()).append("\n");
+            }
+        }
+        if (count == 0) {
+            Ui.printMessage("No recipes matched \"" + query + "\".");
+        } else {
+            Ui.printGradientMessage("Found " + count + " recipe(s) matching \""
+                    + query + "\":\n" + sb.toString().stripTrailing());
+        }
     }
 
     public int size(){

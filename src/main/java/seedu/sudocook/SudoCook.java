@@ -41,7 +41,7 @@ public class SudoCook {
         Storage.loadRecipes(recipes);
         Storage.loadInventory(inventory);
 
-        ui.printWelcome();
+        Ui.printWelcome();
 
         Command cmd;
         String input = ui.readInput();
@@ -57,6 +57,9 @@ public class SudoCook {
             if (cmd instanceof UndoCommand) {
                 logger.log(Level.FINE, "Routing undo command");
                 ((UndoCommand) cmd).execute(history, recipes, inventory);
+            if (cmd instanceof SearchIngredientCommand) {
+                logger.log(Level.FINE, "Routing search-i command to Inventory");
+                cmd.execute(inventory);
             } else if (cmd instanceof AddIngredientCommand ||
                     cmd instanceof ListIngredientCommand ||
                     cmd instanceof DeleteIngredientCommand) {
@@ -73,12 +76,19 @@ public class SudoCook {
                 history.saveSnapshot(recipes, inventory);
                 cmd.execute(recipes.getRecipe(cmd.getIndex()), inventory);
 
-            } else if (cmd instanceof RecommendRecipeCommand) {
+            } else if (cmd instanceof RecommendByIngredientCommand || cmd instanceof RecommendByInventoryCommand
+                    || cmd instanceof RecommendByMissingCommand) {
                 logger.log(Level.FINE, "Routing recommend command");
                 cmd.execute(inventory, recipes); // Read-only, no state change
             } else if (cmd instanceof ListRecipeCommand) {
                 logger.log(Level.FINE, "Routing list recipe command");
                 cmd.execute(recipes); // Read-only, no state change
+                cmd.execute(inventory, recipes);
+            } else if (cmd instanceof SortInventoryCommand){
+                logger.log(Level.FINE, "Routing sort inventory command");
+                cmd.execute(inventory);
+                Command listCommand = new ListIngredientCommand();
+                listCommand.execute(inventory);
             } else {
                 logger.log(Level.FINE, "Routing command to RecipeBook");
                 // Save state before executing modifying command (add-r, delete-r, filter-r)

@@ -8,10 +8,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 
+import java.util.ArrayList;
+
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class RecommendRecipeCommandTest {
+public class RecommendByIngredientCommandTest {
     private RecipeBook recipes;
     private Inventory inventory;
     private ByteArrayOutputStream output;
@@ -21,6 +23,12 @@ public class RecommendRecipeCommandTest {
     public void setUp() {
         recipes = new RecipeBook();
         inventory = new Inventory();
+        ArrayList<Ingredient> mixueIngredients = new ArrayList<>();
+        mixueIngredients.add(new Ingredient("Water", 1, "Liter"));
+        mixueIngredients.add(new Ingredient("Sugar", 1, "mg"));
+        ArrayList<String> mixueSteps = new ArrayList<>();
+        mixueSteps.add("Pour MIXUE into pot");
+        recipes.addRecipe(new Recipe("Mixue", mixueIngredients, mixueSteps, 5));
         originalOut = System.out;
         output = new ByteArrayOutputStream();
         System.setOut(new PrintStream(output, true, StandardCharsets.UTF_8));
@@ -35,7 +43,7 @@ public class RecommendRecipeCommandTest {
     public void execute_ingredientInInventoryAndRecipe_printsRecipe() {
         inventory.addIngredient(new Ingredient("Sugar", 2, "mg"));
 
-        RecommendRecipeCommand cmd = new RecommendRecipeCommand("Sugar");
+        RecommendByIngredientCommand cmd = new RecommendByIngredientCommand("Sugar");
         cmd.execute(inventory, recipes);
 
         assertTrue(getOutput().contains("Mixue"));
@@ -43,7 +51,7 @@ public class RecommendRecipeCommandTest {
 
     @Test
     public void execute_ingredientNotInInventory_printsError() {
-        RecommendRecipeCommand cmd = new RecommendRecipeCommand("Egg");
+        RecommendByIngredientCommand cmd = new RecommendByIngredientCommand("Egg");
         cmd.execute(inventory, recipes);
 
         assertTrue(getOutput().contains("does not exist in inventory"));
@@ -53,7 +61,7 @@ public class RecommendRecipeCommandTest {
     public void execute_ingredientInInventoryButNoRecipeUseIt_printsNoMatch() {
         inventory.addIngredient(new Ingredient("Egg", 1, "pcs"));
 
-        RecommendRecipeCommand cmd = new RecommendRecipeCommand("Egg");
+        RecommendByIngredientCommand cmd = new RecommendByIngredientCommand("Egg");
         cmd.execute(inventory, recipes);
 
         assertTrue(getOutput().contains("No recipes"));
@@ -62,7 +70,7 @@ public class RecommendRecipeCommandTest {
     @Test
     public void parse_invalidFormat_returnsNoOpCommand() {
         Parser parser = new Parser(new Ui());
-        Command cmd = parser.parse("recommend-r");
+        Command cmd = parser.parse("recommend-r invalid");
 
         assertSame(Command.class, cmd.getClass());
         assertTrue(getOutput().contains("Oops!"));
@@ -82,7 +90,7 @@ public class RecommendRecipeCommandTest {
         inventory.addIngredient(new Ingredient("Salt", 1, "g"));   // 不匹配，走 line 16 false
         inventory.addIngredient(new Ingredient("Sugar", 2, "mg")); // 匹配
 
-        RecommendRecipeCommand cmd = new RecommendRecipeCommand("Sugar");
+        RecommendByIngredientCommand cmd = new RecommendByIngredientCommand("Sugar");
         cmd.execute(inventory, recipes);
 
         assertTrue(getOutput().contains("Mixue"));
@@ -93,7 +101,7 @@ public class RecommendRecipeCommandTest {
         // Mixue 需要 Sugar 1mg，但 inventory 只有 0.5mg，走 line 29 qty > amount
         inventory.addIngredient(new Ingredient("Sugar", 0.5, "mg"));
 
-        RecommendRecipeCommand cmd = new RecommendRecipeCommand("Sugar");
+        RecommendByIngredientCommand cmd = new RecommendByIngredientCommand("Sugar");
         cmd.execute(inventory, recipes);
 
         assertTrue(getOutput().contains("No recipes"));

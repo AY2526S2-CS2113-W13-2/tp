@@ -8,6 +8,10 @@ import seedu.sudocook.util.AnsiColor;
 
 public class Ui {
     // All static variables first
+    private static final boolean IS_TTY = System.console() != null;
+    public static final String RESET = IS_TTY ? "\u001B[0m" : "";
+    public static final String RED = IS_TTY ? "\u001B[31m" : "";
+    public static final String CYAN = IS_TTY ? "\u001B[36m" : "";
     private static final String DIVIDER = "____________________________________________________________";
     private static final String INDENT = "    ";
 
@@ -32,7 +36,21 @@ public class Ui {
     }
 
     public static String getGradientText(String text, int r1, int g1, int b1, int r2, int g2, int b2) {
-        return AnsiColor.gradient(text, r1, g1, b1, r2, g2, b2);
+        if (!IS_TTY) {
+            return text;
+        }
+        StringBuilder sb = new StringBuilder();
+        int len = text.length();
+        for (int i = 0; i < len; i++) {
+            double ratio = (double) i / (len > 1 ? len - 1 : 1);
+            int r = (int) (r1 + ratio * (r2 - r1));
+            int g = (int) (g1 + ratio * (g2 - g1));
+            int b = (int) (b1 + ratio * (b2 - b1));
+            sb.append(String.format("\u001B[38;2;%d;%d;%dm", r, g, b));
+            sb.append(text.charAt(i));
+        }
+        sb.append(RESET);
+        return sb.toString();
     }
 
     public static void printWelcome() {

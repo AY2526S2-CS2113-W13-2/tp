@@ -1,6 +1,7 @@
 package seedu.sudocook;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 
 /**
  * Manages the inventory of ingredients.
@@ -39,6 +40,14 @@ public class Inventory {
         return new ArrayList<>(ingredients);
     }
 
+    public ArrayList<Ingredient> sortIngredients() {
+        ingredients.sort(Comparator.comparing(
+                Ingredient::getExpiryDate,
+                Comparator.nullsLast(Comparator.naturalOrder())
+        ));
+        return new ArrayList<>(ingredients);
+    }
+
     /**
      * Returns the number of ingredients in the inventory.
      *
@@ -60,6 +69,27 @@ public class Inventory {
 
     public Ingredient getIngredient(int index) {
         return ingredients.get(index);
+    }
+
+    public void searchIngredients(String query) {
+        if (ingredients.isEmpty()) {
+            Ui.printMessage("No ingredients found.");
+            return;
+        }
+        StringBuilder sb = new StringBuilder();
+        int count = 0;
+        for (int i = 0; i < ingredients.size(); i++) {
+            if (FuzzySearch.isMatch(query, ingredients.get(i).getName())) {
+                count++;
+                sb.append(i + 1).append(". ").append(ingredients.get(i)).append("\n");
+            }
+        }
+        if (count == 0) {
+            Ui.printMessage("No ingredients matched \"" + query + "\".");
+        } else {
+            Ui.printGradientMessage("Found " + count + " ingredient(s) matching \""
+                    + query + "\":\n" + sb.toString().stripTrailing());
+        }
     }
 
     public int findIndexByName(String name) {
