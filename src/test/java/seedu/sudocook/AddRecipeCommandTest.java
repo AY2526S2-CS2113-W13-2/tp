@@ -3,8 +3,12 @@ package seedu.sudocook;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 public class AddRecipeCommandTest {
@@ -51,6 +55,37 @@ public class AddRecipeCommandTest {
         cmd.execute(testRecipeBook);
         assertEquals(1, testRecipeBook.size());
 
+    }
+
+    @Test
+    public void parserTest_zeroIngredientQuantity_rejected() {
+        assertInvalidIngredientQuantity("add-r {Fried Rice} i/rice 0 cups egg 2 pcs "
+                + "s/{Cook the rice.} {Scramble the eggs.} t/15 c/400");
+    }
+
+    @Test
+    public void parserTest_negativeIngredientQuantity_rejected() {
+        assertInvalidIngredientQuantity("add-r {Fried Rice} i/rice -1 cups egg 2 pcs "
+                + "s/{Cook the rice.} {Scramble the eggs.} t/15 c/400");
+    }
+
+    private void assertInvalidIngredientQuantity(String testCmd) {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        PrintStream originalOut = System.out;
+        System.setOut(new PrintStream(output, true, StandardCharsets.UTF_8));
+
+        try {
+            Ui ui = new Ui();
+            Parser parser = new Parser(ui);
+            Command cmd = parser.parse(testCmd);
+            cmd.execute(testRecipeBook);
+
+            assertEquals(0, testRecipeBook.size());
+            assertTrue(output.toString(StandardCharsets.UTF_8)
+                    .contains("Oops! Invalid ingredient quantity in add-r format."));
+        } finally {
+            System.setOut(originalOut);
+        }
     }
 
 
