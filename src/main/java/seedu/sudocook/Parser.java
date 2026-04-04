@@ -237,6 +237,11 @@ public class Parser {
 
                 try {
                     quantity = Double.parseDouble(quantityToken);
+                    if (quantity <= 0) {
+                        Ui.printError("Invalid ingredient quantity in add-r format.");
+                        logger.log(Level.INFO, "Caught non-positive add-r ingredient quantity");
+                        return new Command(false);
+                    }
                 } catch (NumberFormatException e) {
                     Ui.printError("Invalid ingredient quantity in add-r format.");
                     logger.log(Level.INFO, "Caught invalid add-r command format in QUANTITY field");
