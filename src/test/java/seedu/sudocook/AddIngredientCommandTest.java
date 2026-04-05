@@ -49,6 +49,19 @@ public class AddIngredientCommandTest {
     }
 
     @Test
+    public void parse_validInputWithLowercaseQInName_addsIngredient() {
+        Inventory inventory = new Inventory();
+
+        parseAndExecute("add-i n/quinoa q/1 u/kg", inventory);
+
+        assertEquals(1, inventory.size());
+        assertEquals("quinoa", inventory.getIngredient(0).getName());
+        assertEquals(1, inventory.getIngredient(0).getQuantity());
+        assertEquals("kg", inventory.getIngredient(0).getUnit());
+        assertNull(inventory.getIngredient(0).getExpiryDate());
+    }
+
+    @Test
     public void parse_missingUnit_doesNotAddIngredient() {
         Inventory inventory = new Inventory();
 

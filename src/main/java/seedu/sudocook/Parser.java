@@ -145,7 +145,7 @@ public class Parser {
                 }
             }
             
-            Pattern addIngredientPattern = Pattern.compile("n/([^q/]+)\\s+q/([\\d.]+)\\s+u/(.+)");
+            Pattern addIngredientPattern = Pattern.compile("n/(.+?)\\s+q/([\\d.]+)\\s+u/(.+)");
             Matcher addIngredientMatcher = addIngredientPattern.matcher(addIngredientInput);
 
             if (!addIngredientMatcher.matches()) {
