@@ -13,7 +13,7 @@ project created by the [SE-EDU initiative](https://se-education.org).
 
 #### Overview
 
-![Recommend Command Class Diagram](team/RecommendByInventorySD.png)
+![Recommend Command Class Diagram](team/RecommendClassDiagram.png)
 
 *Figure 1: Class Diagram for Recommendation Commands*
 
