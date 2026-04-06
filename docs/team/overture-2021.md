@@ -16,7 +16,7 @@ through an intuitive text interface.
 - Revise help command accordingly.
 - Implement expiry date propagation when running add-i on an ingredient previously not posessing an expiry date.
 - Fix bug: add-i rejects valid ingredient names containing lowercase q.
-- Contribution to the DG: `sort-i`, `cook`, `list-r` commands, drew sequence diagrams: [list-i](ListIngredients.png), [sort-i](SortInventory.png), [cook](cook.png)
+- Contribution to the DG: `sort-i`, `cook`, `list-r` commands, drew sequence diagrams: [list-i](ListIngredients.png), [sort-i](SortInventory.png), [cook](cook.png), draw Architecture Diagram
 
 #### Contributions to team-based tasks
 - Set up the github organization and forked the repository.
