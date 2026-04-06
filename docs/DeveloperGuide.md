@@ -1,5 +1,7 @@
 # Developer Guide
 
+![Architecture Diagram](team/ArchDiagram.png)
+
 ## Acknowledgements
 
 This project is based on the [AddressBook-Level3 (AB3)](https://se-education.org/addressbook-level3/)
@@ -248,7 +250,7 @@ Both commands delegate to `RecipeBook` via `ListRecipeCommand` and `ViewRecipeCo
 | `Parser` | Detects `list-r` or `view-r` prefix and constructs the appropriate command |
 | `ListRecipeCommand` | Calls `RecipeBook.listRecipe()` |
 | `ViewRecipeCommand` | Calls `RecipeBook.viewRecipe()` or `RecipeBook.viewRecipe(index)` |
-| `RecipeBook` | Builds and prints the output string |
+| `RecipeBook` | Builds the output string and delegates display to `Ui` |
 
 **`list-r` execution:**
 
