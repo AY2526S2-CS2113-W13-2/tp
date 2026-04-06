@@ -1,6 +1,7 @@
 @startuml
 'https://plantuml.com/sequence-diagram
 
+scale 4
 autonumber
 hide footbox
 
@@ -50,17 +51,14 @@ loop for each recipe in recipes
         activate Inventory
         Inventory --> Cmd : item
         deactivate Inventory
-        alt item name matches required ingredient
+        opt item name matches required ingredient
             Cmd -> Item : getQuantity()
             activate Item
             Item --> Cmd : available
             deactivate Item
         end
     end
-    alt available < required.getQuantity()
-        note right of Cmd : recipe excluded immediately
-    end
-    alt all ingredients available
+    opt all ingredients available
         Cmd -> Recipe : getName()
         activate Recipe
         Recipe --> Cmd : recipeName

@@ -1,6 +1,7 @@
 @startuml
 'https://plantuml.com/sequence-diagram
 
+scale 4
 autonumber
 hide footbox
 
@@ -39,7 +40,7 @@ loop for each ingredient in inventory
     activate Inventory
     Inventory --> Cmd : ingredient
     deactivate Inventory
-    alt ingredient name matches
+    opt ingredient name matches
         Cmd -> Ingredient : getQuantity()
         activate Ingredient
         Ingredient --> Cmd : amount
@@ -59,7 +60,7 @@ loop for each recipe in recipes
     deactivate Recipe
 
     loop for each ingredient in ingredientList
-        alt ingredient name matches AND quantity <= amount
+        opt ingredient name matches AND quantity <= amount
             Cmd -> Recipe : getName()
             activate Recipe
             Recipe --> Cmd : recipeName
