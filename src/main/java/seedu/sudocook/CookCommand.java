@@ -36,7 +36,7 @@ public class CookCommand extends Command {
                 Command c = new DeleteIngredientCommand(i.getName(), i.getQuantity());
                 c.execute(inventory);
             }
-            Ui.printMessage("Cooked Recipe" + recipe.getName());
+            Ui.printMessage("Cooked Recipe " + recipe.getName());
         } catch (RuntimeException e) {
             Ui.printError("Not enough ingredients");
         }
