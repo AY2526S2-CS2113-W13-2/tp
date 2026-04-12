@@ -143,6 +143,26 @@ public class CookTest {
     }
 
     @Test
+    public void execute_unitMismatch_printsErrorAndLeavesInventoryUntouched() {
+        ArrayList<Ingredient> riceIngredients = new ArrayList<>();
+        riceIngredients.add(new Ingredient("rice", 1, "grams"));
+        ArrayList<String> riceSteps = new ArrayList<>();
+        riceSteps.add("Cook");
+        recipes.addRecipe(new Recipe("UnitCook", riceIngredients, riceSteps, 5, 100));
+        ingredients.addIngredient(new Ingredient("rice", 1, "cups"));
+        output.reset();
+
+        Command cmd = parser.parse("cook 2");
+        executeCookCommand(cmd);
+
+        assertEquals(1, ingredients.getSize());
+        assertEquals(1.0, ingredients.getIngredient(0).getQuantity());
+        assertEquals("cups", ingredients.getIngredient(0).getUnit());
+        assertTrue(getOutput().contains("Due to unit mismatch, inventory requirements cannot be confirmed."));
+        assertTrue(!getOutput().contains("Cooked Recipe UnitCook"));
+    }
+
+    @Test
     public void execute_validCookWithMultipleExpiries_consumesEarliestExpiryFirst() {
         ingredients.addIngredient(new Ingredient("Water", 0.5, "Liter", LocalDate.of(2026, 4, 1)));
         ingredients.addIngredient(new Ingredient("Water", 1, "Liter", LocalDate.of(2026, 5, 1)));

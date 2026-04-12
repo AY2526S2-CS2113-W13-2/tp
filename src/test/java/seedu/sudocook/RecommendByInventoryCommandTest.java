@@ -145,6 +145,23 @@ public class RecommendByInventoryCommandTest {
     }
 
     @Test
+    public void execute_unitMismatch_recipeExcluded() {
+        ArrayList<Ingredient> riceIngredients = new ArrayList<>();
+        riceIngredients.add(new Ingredient("rice", 1, "grams"));
+        ArrayList<String> riceSteps = new ArrayList<>();
+        riceSteps.add("Cook");
+        recipes.addRecipe(new Recipe("UnitCook", riceIngredients, riceSteps, 5, 100));
+        inventory.addIngredient(new Ingredient("rice", 1, "cups"));
+        output.reset();
+
+        new RecommendByInventoryCommand().execute(inventory, recipes);
+
+        String out = getOutput();
+        assertTrue(!out.contains("UnitCook"));
+        assertTrue(out.contains("No recipes"));
+    }
+
+    @Test
     public void parse_noArgs_returnsRecommendByInventoryCommand() {
         Parser parser = new Parser(new Ui());
         Command cmd = parser.parse("recommend-r");
