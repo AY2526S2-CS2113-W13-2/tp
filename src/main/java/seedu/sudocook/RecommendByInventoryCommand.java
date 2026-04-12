@@ -36,6 +36,9 @@ public class RecommendByInventoryCommand extends Command {
             for (int j = 0; j < inventory.getSize(); j++) {
                 Ingredient item = inventory.getIngredient(j);
                 if (item.getName().equalsIgnoreCase(required.getName())) {
+                    if (!item.getUnit().equalsIgnoreCase(required.getUnit())) {
+                        return false;
+                    }
                     available = item.getQuantity();
                     break;
                 }

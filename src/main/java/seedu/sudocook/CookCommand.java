@@ -27,6 +27,11 @@ public class CookCommand extends Command {
             ArrayList<Ingredient> ingredientRequirements = IngredientRequirements.aggregateFor(recipe);
             for (Ingredient i : ingredientRequirements) {
                 int ingredientIndex = inventory.findIndexByName(i.getName());
+                if (ingredientIndex >= 0
+                        && !inventory.getIngredient(ingredientIndex).getUnit().equalsIgnoreCase(i.getUnit())) {
+                    Ui.printError("Due to unit mismatch, inventory requirements cannot be confirmed.");
+                    return;
+                }
                 if (ingredientIndex < 0
                         || inventory.getIngredient(ingredientIndex).getQuantity() < i.getQuantity()) {
                     logger.log(Level.INFO, "Not enough ingredients for this recipe");
