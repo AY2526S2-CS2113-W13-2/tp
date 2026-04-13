@@ -65,6 +65,19 @@ public class AddRecipeCommandTest {
     }
 
     @Test
+    public void parserTest_extraInternalSpacesInName_normalizesName() {
+        String testCmd = "add-r {Fried  Rice} i/rice 2 cups egg 2 pcs "
+                + "s/{Cook the rice.} {Scramble the eggs.} t/15 c/400";
+        Ui ui = new Ui();
+        Parser parser = new Parser(ui);
+        Command cmd = parser.parse(testCmd);
+        cmd.execute(testRecipeBook);
+
+        assertEquals(1, testRecipeBook.getSize());
+        assertEquals("Fried Rice", testRecipeBook.getRecipe(0).getName());
+    }
+
+    @Test
     public void formatErrorTest() {
         String testCmd = "add-r Gibberish Gibberish";
         Ui ui = new Ui();

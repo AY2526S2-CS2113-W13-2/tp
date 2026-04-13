@@ -134,6 +134,26 @@ public class AddIngredientCommandTest {
         assertEquals(0, inventory.getSize());
     }
 
+    @Test
+    public void parse_extraInternalSpacesInName_normalizesName() {
+        Inventory inventory = new Inventory();
+
+        parseAndExecute("add-i n/fried  rice q/1 u/cup", inventory);
+
+        assertEquals(1, inventory.getSize());
+        assertEquals("fried rice", inventory.getIngredient(0).getName());
+    }
+
+    @Test
+    public void parse_extraInternalSpacesInUnit_normalizesUnit() {
+        Inventory inventory = new Inventory();
+
+        parseAndExecute("add-i n/rice q/1 u/big  cup", inventory);
+
+        assertEquals(1, inventory.getSize());
+        assertEquals("big cup", inventory.getIngredient(0).getUnit());
+    }
+
     private void parseAndExecute(String input, Inventory inventory) {
         Parser parser = new Parser(new Ui());
         Command command = parser.parse(input);
