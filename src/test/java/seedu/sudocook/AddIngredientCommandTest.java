@@ -15,6 +15,7 @@ import java.util.logging.StreamHandler;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AddIngredientCommandTest {
     @Test
@@ -61,6 +62,31 @@ public class AddIngredientCommandTest {
         assertEquals(1.5, inventory.getIngredient(0).getQuantity());
         assertEquals("kg", inventory.getIngredient(0).getUnit());
         assertNull(inventory.getIngredient(0).getExpiryDate());
+    }
+
+    @Test
+    public void parse_existingIngredientWithDifferentUnit_rejectsAddition() {
+        Inventory inventory = new Inventory();
+
+        parseAndExecute("add-i n/flour q/1 u/cup", inventory);
+        String output = captureOutput(() -> parseAndExecute("add-i n/flour q/500 u/g", inventory));
+
+        assertEquals(1, inventory.getSize());
+        assertEquals("flour", inventory.getIngredient(0).getName());
+        assertEquals(1, inventory.getIngredient(0).getQuantity());
+        assertEquals("cup", inventory.getIngredient(0).getUnit());
+        assertTrue(output.contains("Oops! Unit mismatch detected with existing stock"));
+    }
+
+    @Test
+    public void parse_existingIngredientWithDifferentCaseUnit_addsIngredient() {
+        Inventory inventory = new Inventory();
+
+        parseAndExecute("add-i n/flour q/1 u/cup", inventory);
+        parseAndExecute("add-i n/Flour q/2 u/CUP", inventory);
+
+        assertEquals(1, inventory.getSize());
+        assertEquals(3, inventory.getIngredient(0).getQuantity());
     }
 
     @Test
@@ -244,5 +270,17 @@ public class AddIngredientCommandTest {
         Parser parser = new Parser(new Ui());
         Command command = parser.parse(input);
         command.execute(inventory);
+    }
+
+    private String captureOutput(Runnable action) {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        PrintStream originalOut = System.out;
+        System.setOut(new PrintStream(output, true, StandardCharsets.UTF_8));
+        try {
+            action.run();
+            return output.toString(StandardCharsets.UTF_8);
+        } finally {
+            System.setOut(originalOut);
+        }
     }
 }
