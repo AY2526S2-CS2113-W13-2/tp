@@ -78,6 +78,30 @@ public class AddRecipeCommandTest {
     }
 
     @Test
+    public void parserTest_duplicateNameWithExtraInternalSpaces_rejected() {
+        String originalCmd = "add-r {Fried Rice} i/rice 1 cup s/{Cook} t/10 c/100";
+        String duplicateCmd = "add-r {Fried   Rice} i/rice 2 cup s/{Cook again} t/20 c/200";
+
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        PrintStream originalOut = System.out;
+        System.setOut(new PrintStream(output, true, StandardCharsets.UTF_8));
+
+        try {
+            Ui ui = new Ui();
+            Parser parser = new Parser(ui);
+            parser.parse(originalCmd).execute(testRecipeBook);
+            parser.parse(duplicateCmd).execute(testRecipeBook);
+
+            assertEquals(1, testRecipeBook.getSize());
+            assertEquals("Fried Rice", testRecipeBook.getRecipe(0).getName());
+            assertTrue(output.toString(StandardCharsets.UTF_8)
+                    .contains("A recipe named \"Fried Rice\" already exists."));
+        } finally {
+            System.setOut(originalOut);
+        }
+    }
+
+    @Test
     public void formatErrorTest() {
         String testCmd = "add-r Gibberish Gibberish";
         Ui ui = new Ui();
