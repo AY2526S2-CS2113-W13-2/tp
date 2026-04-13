@@ -124,7 +124,7 @@ public class Parser {
     }
 
     private Command parseRecommendByIngredient(String args) {
-        String ingredientName = args.substring("n/".length()).trim();
+        String ingredientName = normalizeWhitespace(args.substring("n/".length()));
         if (ingredientName.isEmpty()) {
             Ui.printError("Ingredient name cannot be empty.");
             return new Command(false);
@@ -138,7 +138,8 @@ public class Parser {
         if (listIngredientInput.isEmpty()) {
             return new ListIngredientCommand();
         }
-        Pattern listIngredientPattern = Pattern.compile("ex/(\\d{4}-\\d{2}-\\d{2})");
+        Pattern listIngredientPattern = Pattern.compile(
+                "ex/(\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01]))");
         Matcher listIngredientMatcher = listIngredientPattern.matcher(listIngredientInput);
         if (!listIngredientMatcher.matches()) {
             Ui.printError("Invalid list-i format. Use: list-i [ex/YYYY-MM-DD]");
@@ -187,12 +188,11 @@ public class Parser {
         String addIngredientInput = input.substring("add-i".length()).trim();
 
         LocalDate expiryDate = null;
-        Pattern expiryPattern = Pattern.compile("(.*)\\s+ex/(.*)");
-        Matcher expiryMatcher = expiryPattern.matcher(addIngredientInput);
-        if (expiryMatcher.matches()) {
-            addIngredientInput = expiryMatcher.group(1);
-            String expiryDateInput = expiryMatcher.group(2);
-            if (!expiryDateInput.matches("\\d{4}-\\d{2}-\\d{2}")) {
+        int expiryIndex = addIngredientInput.lastIndexOf(" ex/");
+        if (expiryIndex >= 0) {
+            String expiryDateInput = addIngredientInput.substring(expiryIndex + " ex/".length()).trim();
+            addIngredientInput = addIngredientInput.substring(0, expiryIndex);
+            if (!expiryDateInput.matches("\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])")) {
                 logger.log(Level.WARNING, "Invalid expiry date format: " + expiryDateInput);
                 Ui.printError("Invalid expiry date format. Use: YYYY-MM-DD");
                 return new Command(false);
@@ -214,9 +214,9 @@ public class Parser {
             return new Command(false);
         }
 
-        String name = addIngredientMatcher.group(1).trim();
+        String name = normalizeWhitespace(addIngredientMatcher.group(1));
         String quantityStr = addIngredientMatcher.group(2).trim();
-        String unit = addIngredientMatcher.group(3).trim();
+        String unit = normalizeWhitespace(addIngredientMatcher.group(3));
 
         if (!name.matches("[a-zA-Z0-9\\s]+")) {
             logger.log(Level.WARNING, "Ingredient name contains special characters");
@@ -254,7 +254,7 @@ public class Parser {
             return new Command(false);
         }
 
-        String name = stripOptionalBraces(addRecipeMatcher.group(1).trim());
+        String name = normalizeWhitespace(stripOptionalBraces(addRecipeMatcher.group(1)));
         String ingredientInput = addRecipeMatcher.group(2).trim();
         String stepInput = addRecipeMatcher.group(3).trim();
         String timeInput = addRecipeMatcher.group(4).trim();
@@ -289,11 +289,12 @@ public class Parser {
         Matcher ingredientMatcher = tokenPattern.matcher(ingredientInput);
         ArrayList<String> ingredientTokens = new ArrayList<>();
         while (ingredientMatcher.find()) {
-            ingredientTokens.add(stripOptionalBraces(ingredientMatcher.group()));
+            ingredientTokens.add(normalizeWhitespace(stripOptionalBraces(ingredientMatcher.group())));
         }
 
         if (ingredientTokens.size() % INGREDIENT_TOKEN_GROUP_SIZE != 0) {
-            Ui.printError("Invalid add-r format. Ingredients should be NAME QUANTITY UNIT.");
+            Ui.printError("Invalid add-r format. Each ingredient must be NAME QUANTITY UNIT. "
+                    + "For names with spaces, use {NAME} QUANTITY UNIT (e.g. {soy sauce} 1 tbsp).");
             logger.log(Level.INFO, "Caught invalid add-r command format in INGREDIENT NAME field");
             return new Command(false);
         }
@@ -320,7 +321,7 @@ public class Parser {
 
         Matcher stepMatcher = tokenPattern.matcher(stepInput);
         while (stepMatcher.find()) {
-            String step = stripOptionalBraces(stepMatcher.group());
+            String step = normalizeWhitespace(stripOptionalBraces(stepMatcher.group()));
             if (step.trim().isEmpty()) {
                 Ui.printError("Recipe name and steps cannot be empty.");
                 logger.log(Level.INFO, "Caught invalid add-r command format in required text fields");
@@ -404,7 +405,7 @@ public class Parser {
 
     private Command parseSearchR(String input) {
         logger.log(Level.INFO, "Received search-r request");
-        String query = input.substring("search-r".length()).trim();
+        String query = normalizeWhitespace(input.substring("search-r".length()));
         if (query.isEmpty()) {
             Ui.printError("Please provide a search query. Use: search-r QUERY");
             return new Command(false);
@@ -414,7 +415,7 @@ public class Parser {
 
     private Command parseSearchI(String input) {
         logger.log(Level.INFO, "Received search-i request");
-        String query = input.substring("search-i".length()).trim();
+        String query = normalizeWhitespace(input.substring("search-i".length()));
         if (query.isEmpty()) {
             Ui.printError("Please provide a search query. Use: search-i QUERY");
             return new Command(false);
@@ -427,6 +428,10 @@ public class Parser {
             return token.substring(1, token.length() - 1);
         }
         return token;
+    }
+
+    private String normalizeWhitespace(String s) {
+        return s.trim().replaceAll("\\s+", " ");
     }
 
     private Command parseUndo() {

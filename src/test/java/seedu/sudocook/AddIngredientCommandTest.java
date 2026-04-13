@@ -108,6 +108,24 @@ public class AddIngredientCommandTest {
     }
 
     @Test
+    public void parse_monthOutOfRange_doesNotAddIngredient() {
+        Inventory inventory = new Inventory();
+
+        parseAndExecute("add-i n/Milk q/1 u/carton ex/2024-13-01", inventory);
+
+        assertEquals(0, inventory.getSize());
+    }
+
+    @Test
+    public void parse_malformedDateExtraDigits_doesNotAddIngredient() {
+        Inventory inventory = new Inventory();
+
+        parseAndExecute("add-i n/Milk q/1 u/carton ex/20230-13-100", inventory);
+
+        assertEquals(0, inventory.getSize());
+    }
+
+    @Test
     public void parse_invalidName_doesNotAddIngredient() {
         Inventory inventory = new Inventory();
 
@@ -132,6 +150,26 @@ public class AddIngredientCommandTest {
         parseAndExecute("add-i n/Sugar q/-1 u/g", inventory);
 
         assertEquals(0, inventory.getSize());
+    }
+
+    @Test
+    public void parse_extraInternalSpacesInName_normalizesName() {
+        Inventory inventory = new Inventory();
+
+        parseAndExecute("add-i n/fried  rice q/1 u/cup", inventory);
+
+        assertEquals(1, inventory.getSize());
+        assertEquals("fried rice", inventory.getIngredient(0).getName());
+    }
+
+    @Test
+    public void parse_extraInternalSpacesInUnit_normalizesUnit() {
+        Inventory inventory = new Inventory();
+
+        parseAndExecute("add-i n/rice q/1 u/big  cup", inventory);
+
+        assertEquals(1, inventory.getSize());
+        assertEquals("big cup", inventory.getIngredient(0).getUnit());
     }
 
     private void parseAndExecute(String input, Inventory inventory) {

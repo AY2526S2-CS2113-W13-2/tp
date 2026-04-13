@@ -33,31 +33,48 @@ public class AddRecipeCommandTest {
     }
 
     @Test
-    public void addCommand_existingNameCaseInsensitive_overwritesOriginalRecipe() {
-        ArrayList<Ingredient> originalIngredients = new ArrayList<>();
-        originalIngredients.add(new Ingredient("Rice", 2, "cups"));
-        ArrayList<String> originalSteps = new ArrayList<>();
-        originalSteps.add("Cook rice");
+    public void addCommand_duplicateNameCaseInsensitive_rejected() {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        PrintStream originalOut = System.out;
+        System.setOut(new PrintStream(output, true, StandardCharsets.UTF_8));
 
-        AddRecipeCommand original = new AddRecipeCommand("Fried Rice", originalIngredients, originalSteps, 15, 400);
-        original.execute(testRecipeBook);
+        try {
+            ArrayList<Ingredient> originalIngredients = new ArrayList<>();
+            originalIngredients.add(new Ingredient("Rice", 2, "cups"));
+            ArrayList<String> originalSteps = new ArrayList<>();
+            originalSteps.add("Cook rice");
 
-        ArrayList<Ingredient> replacementIngredients = new ArrayList<>();
-        replacementIngredients.add(new Ingredient("Noodles", 1, "packet"));
-        ArrayList<String> replacementSteps = new ArrayList<>();
-        replacementSteps.add("Boil noodles");
+            AddRecipeCommand original = new AddRecipeCommand("Fried Rice", originalIngredients, originalSteps, 15, 400);
+            original.execute(testRecipeBook);
 
-        AddRecipeCommand replacement = new AddRecipeCommand("fried rice", replacementIngredients, replacementSteps,
-                5, 350);
-        replacement.execute(testRecipeBook);
+            ArrayList<Ingredient> duplicateIngredients = new ArrayList<>();
+            duplicateIngredients.add(new Ingredient("Noodles", 1, "packet"));
+            ArrayList<String> duplicateSteps = new ArrayList<>();
+            duplicateSteps.add("Boil noodles");
 
-        Recipe savedRecipe = testRecipeBook.getRecipe(0);
+            AddRecipeCommand duplicate = new AddRecipeCommand("fried rice", duplicateIngredients, duplicateSteps,
+                    5, 350);
+            duplicate.execute(testRecipeBook);
+
+            assertEquals(1, testRecipeBook.getSize());
+            assertTrue(output.toString(StandardCharsets.UTF_8)
+                    .contains("A recipe named \"fried rice\" already exists."));
+        } finally {
+            System.setOut(originalOut);
+        }
+    }
+
+    @Test
+    public void parserTest_extraInternalSpacesInName_normalizesName() {
+        String testCmd = "add-r {Fried  Rice} i/rice 2 cups egg 2 pcs "
+                + "s/{Cook the rice.} {Scramble the eggs.} t/15 c/400";
+        Ui ui = new Ui();
+        Parser parser = new Parser(ui);
+        Command cmd = parser.parse(testCmd);
+        cmd.execute(testRecipeBook);
+
         assertEquals(1, testRecipeBook.getSize());
-        assertEquals("fried rice", savedRecipe.getName());
-        assertEquals("Noodles", savedRecipe.getIngredients().get(0).getName());
-        assertEquals("Boil noodles", savedRecipe.getSteps().get(0));
-        assertEquals(5, savedRecipe.getTime());
-        assertEquals(350, savedRecipe.getCalories());
+        assertEquals("Fried Rice", testRecipeBook.getRecipe(0).getName());
     }
 
     @Test
