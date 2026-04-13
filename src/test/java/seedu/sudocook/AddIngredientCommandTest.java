@@ -2,10 +2,20 @@ package seedu.sudocook;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
+import java.util.logging.StreamHandler;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AddIngredientCommandTest {
     @Test
@@ -52,6 +62,31 @@ public class AddIngredientCommandTest {
         assertEquals(1.5, inventory.getIngredient(0).getQuantity());
         assertEquals("kg", inventory.getIngredient(0).getUnit());
         assertNull(inventory.getIngredient(0).getExpiryDate());
+    }
+
+    @Test
+    public void parse_existingIngredientWithDifferentUnit_rejectsAddition() {
+        Inventory inventory = new Inventory();
+
+        parseAndExecute("add-i n/flour q/1 u/cup", inventory);
+        String output = captureOutput(() -> parseAndExecute("add-i n/flour q/500 u/g", inventory));
+
+        assertEquals(1, inventory.getSize());
+        assertEquals("flour", inventory.getIngredient(0).getName());
+        assertEquals(1, inventory.getIngredient(0).getQuantity());
+        assertEquals("cup", inventory.getIngredient(0).getUnit());
+        assertTrue(output.contains("Oops! Unit mismatch detected with existing stock"));
+    }
+
+    @Test
+    public void parse_existingIngredientWithDifferentCaseUnit_addsIngredient() {
+        Inventory inventory = new Inventory();
+
+        parseAndExecute("add-i n/flour q/1 u/cup", inventory);
+        parseAndExecute("add-i n/Flour q/2 u/CUP", inventory);
+
+        assertEquals(1, inventory.getSize());
+        assertEquals(3, inventory.getIngredient(0).getQuantity());
     }
 
     @Test
@@ -148,6 +183,43 @@ public class AddIngredientCommandTest {
     }
 
     @Test
+    public void parse_invalidName_doesNotWriteInternalLogToStdErr() {
+        ByteArrayOutputStream errorOutput = new ByteArrayOutputStream();
+        PrintStream originalErr = System.err;
+        Logger rootLogger = Logger.getLogger("");
+        Handler[] originalHandlers = rootLogger.getHandlers();
+        Level originalLevel = rootLogger.getLevel();
+
+        System.setErr(new PrintStream(errorOutput, true, StandardCharsets.UTF_8));
+        for (Handler handler : originalHandlers) {
+            rootLogger.removeHandler(handler);
+        }
+        StreamHandler testHandler = new StreamHandler(System.err, new SimpleFormatter()) {
+            @Override
+            public synchronized void publish(LogRecord record) {
+                super.publish(record);
+                flush();
+            }
+        };
+        testHandler.setLevel(Level.WARNING);
+        rootLogger.setLevel(Level.WARNING);
+        rootLogger.addHandler(testHandler);
+
+        try {
+            parseAndExecute("add-i n/all-purpose flour q/1 u/kg", new Inventory());
+            assertEquals("", errorOutput.toString(StandardCharsets.UTF_8));
+        } finally {
+            rootLogger.removeHandler(testHandler);
+            testHandler.close();
+            rootLogger.setLevel(originalLevel);
+            for (Handler handler : originalHandlers) {
+                rootLogger.addHandler(handler);
+            }
+            System.setErr(originalErr);
+        }
+    }
+
+    @Test
     public void parse_invalidUnitSymbols_doesNotAddIngredient() {
         Inventory inventory = new Inventory();
 
@@ -198,5 +270,17 @@ public class AddIngredientCommandTest {
         Parser parser = new Parser(new Ui());
         Command command = parser.parse(input);
         command.execute(inventory);
+    }
+
+    private String captureOutput(Runnable action) {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        PrintStream originalOut = System.out;
+        System.setOut(new PrintStream(output, true, StandardCharsets.UTF_8));
+        try {
+            action.run();
+            return output.toString(StandardCharsets.UTF_8);
+        } finally {
+            System.setOut(originalOut);
+        }
     }
 }
