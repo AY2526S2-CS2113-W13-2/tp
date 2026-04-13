@@ -68,6 +68,19 @@ public class AddIngredientCommandTest {
     }
 
     @Test
+    public void parse_uppercaseCommandAndPrefixes_addsIngredientWithExpiry() {
+        Inventory inventory = new Inventory();
+
+        parseAndExecute("ADD-I N/Tomato Q/3 U/pcs EX/2026-04-10", inventory);
+
+        assertEquals(1, inventory.getSize());
+        assertEquals("Tomato", inventory.getIngredient(0).getName());
+        assertEquals(3, inventory.getIngredient(0).getQuantity());
+        assertEquals("pcs", inventory.getIngredient(0).getUnit());
+        assertEquals(LocalDate.of(2026, 4, 10), inventory.getIngredient(0).getExpiryDate());
+    }
+
+    @Test
     public void parse_validInputWithLowercaseQInName_addsIngredient() {
         Inventory inventory = new Inventory();
 
