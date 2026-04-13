@@ -28,7 +28,7 @@ Format: `add-r {NAME} i/INGREDIENT_NAME QUANTITY UNIT [INGREDIENT_NAME QUANTITY 
 * Each ingredient quantity must be a positive number.
 * Ingredients or steps containing spaces should be wrapped in `{}`.
 * `TIME_IN_MINUTES` must be a non-negative integer.
-* `CALORIES` must be a non-negative integer representing the calorie count in kcal.
+* `CALORIES` must be a positive integer (greater than 0) representing the calorie count in kcal.
 
 Examples:
 
@@ -59,9 +59,9 @@ Expected output (invalid ingredient quantity):
 Oops! Invalid ingredient quantity in add-r format.
 ```
 
-Expected output (negative time or calories):
+Expected output (zero or negative calories):
 ```
-Oops! Time and calories cannot be negative.
+Oops! Calories must be a positive number. A meal cannot have 0 or negative calories.
 ```
 
 ---
