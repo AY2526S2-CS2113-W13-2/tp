@@ -103,6 +103,18 @@ public class AddRecipeCommandTest {
     }
 
     @Test
+    public void parserTest_uppercaseCommandAndPrefixes_addsRecipe() {
+        String testCmd = "ADD-R {Fried Rice} I/rice 2 cups egg "
+                + "2 pcs soy_sauce 1 tbsp S/{Cook the rice.} {Scramble the eggs.} {Mix everything together.}"
+                + " T/15 C/400";
+        Ui ui = new Ui();
+        Parser parser = new Parser(ui);
+        Command cmd = parser.parse(testCmd);
+        cmd.execute(testRecipeBook);
+        assertEquals(1, testRecipeBook.getSize());
+    }
+
+    @Test
     public void parserTest_emptyRecipeName_rejected() {
         assertInvalidRecipeText("add-r {} i/salt 1 g s/{Add salt.} t/10 c/100");
     }
