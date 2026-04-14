@@ -37,8 +37,8 @@ Format: `add-r {NAME} i/INGREDIENT_NAME QUANTITY UNIT [INGREDIENT_NAME QUANTITY 
 * Each ingredient must be provided in groups of three: `NAME QUANTITY UNIT`.
 * Each ingredient quantity must be a positive number.
 * Ingredients or steps containing spaces should be wrapped in `{}`.
-* `TIME_IN_MINUTES` must be a non-negative integer.
-* `CALORIES` must be a positive integer (greater than 0) representing the calorie count in kcal.
+* `TIME_IN_MINUTES` must be an integer between 1 and 100,000.
+* `CALORIES` must be an integer between 1 and 100,000 representing the calorie count in kcal.
 
 Examples:
 
@@ -68,9 +68,9 @@ Expected output (invalid format):
 Oops! Invalid add-r format. Use: add-r NAME i/INGREDIENTS s/STEPS t/TIME c/CALORIES
 ```
 
-Expected output (invalid integer):
+Expected output (invalid or out-of-range integer):
 ```
-Oops! Invalid add-r format. Time and calories should be integers.
+Oops! Invalid add-r format. Time and calories must be integers between 1 and 100,000.
 ```
 
 Expected output (invalid ingredient quantity):
