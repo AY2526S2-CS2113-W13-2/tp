@@ -62,7 +62,12 @@ public class Parser {
     private Command parseDeleteR(String input) {
         logger.log(Level.INFO, "Received delete-r request");
         try {
-            int index = Integer.parseInt(input.substring(DELETE_R_PREFIX).trim());
+            long indexLong = Long.parseLong(input.substring(DELETE_R_PREFIX).trim());
+            if (indexLong > Integer.MAX_VALUE || indexLong < Integer.MIN_VALUE) {
+                Ui.printError("Invalid index for delete-r. Use: delete-r INDEX");
+                return new Command(false);
+            }
+            int index = (int) indexLong;
             assert index > 0 : "Parsed index must be positive";
             return new DeleteRecipeCommand(index);
         } catch (NumberFormatException e) {
@@ -84,7 +89,12 @@ public class Parser {
             return new ViewRecipeCommand();
         }
         try {
-            int index = Integer.parseInt(viewArgs);
+            long indexLong = Long.parseLong(viewArgs);
+            if (indexLong > Integer.MAX_VALUE || indexLong < Integer.MIN_VALUE) {
+                Ui.printError("Invalid index for view-r. Use: view-r [INDEX]");
+                return new Command(false);
+            }
+            int index = (int) indexLong;
             return new ViewRecipeCommand(index);
         } catch (NumberFormatException e) {
             Ui.printError("Invalid index for view-r. Use: view-r [INDEX]");
@@ -111,7 +121,12 @@ public class Parser {
     private Command parseRecommendByMissing(String args) {
         String maxMissingStr = args.substring("missing/".length()).trim();
         try {
-            int maxMissing = Integer.parseInt(maxMissingStr);
+            long maxMissingLong = Long.parseLong(maxMissingStr);
+            if (maxMissingLong > Integer.MAX_VALUE || maxMissingLong < Integer.MIN_VALUE) {
+                Ui.printError("Invalid format. Use: recommend-r missing/N");
+                return new Command(false);
+            }
+            int maxMissing = (int) maxMissingLong;
             if (maxMissing <= 0) {
                 Ui.printError("Missing count must be a positive number.");
                 return new Command(false);
@@ -413,7 +428,12 @@ public class Parser {
         logger.log(Level.INFO, "Received cook request");
         String cookArgs = input.substring("cook".length()).trim();
         try {
-            int index = Integer.parseInt(cookArgs) - 1;
+            long indexLong = Long.parseLong(cookArgs);
+            if (indexLong > Integer.MAX_VALUE || indexLong < Integer.MIN_VALUE) {
+                Ui.printError("You should indicate the index of the recipe when cooking!");
+                return new Command(false);
+            }
+            int index = (int) indexLong - 1;
             return new CookCommand(false, index);
         } catch (NumberFormatException e) {
             Ui.printError("You should indicate the index of the recipe when cooking!");
