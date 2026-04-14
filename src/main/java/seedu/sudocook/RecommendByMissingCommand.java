@@ -45,14 +45,17 @@ public class RecommendByMissingCommand extends Command {
                 if (item.getName().equalsIgnoreCase(required.getName())) {
                     double converted = UnitConverter.convert(
                             item.getQuantity(), item.getUnit(), required.getUnit());
-                    availableInRequiredUnit = (converted >= 0) ? converted : 0;
-                    break;
+                    if (converted >= 0) {
+                        availableInRequiredUnit += converted;
+                    }
                 }
             }
             if (availableInRequiredUnit < required.getQuantity()) {
                 double shortfall = required.getQuantity() - availableInRequiredUnit;
-                String shortfallStr = Ui.formatQuantity(shortfall) + " " + required.getUnit();
-                String formatted = required.getName() + " (" + shortfallStr + ")";
+                String shortfallStr =
+                        Ui.formatQuantity(shortfall) + " " + required.getUnit();
+                String formatted =
+                        required.getName() + " (" + shortfallStr + ")";
                 missing.add(formatted);
             }
         }
