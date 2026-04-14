@@ -201,7 +201,7 @@ public class AddRecipeCommandTest {
 
             assertEquals(0, testRecipeBook.getSize());
             assertTrue(output.toString(StandardCharsets.UTF_8)
-                    .contains("Oops! Time cannot be negative."));
+                    .contains("Oops! Time must be between 1 and 100,000 minutes."));
         } finally {
             System.setOut(originalOut);
         }
@@ -220,7 +220,7 @@ public class AddRecipeCommandTest {
 
             assertEquals(0, testRecipeBook.getSize());
             assertTrue(output.toString(StandardCharsets.UTF_8)
-                    .contains("Oops! Calories must be a positive number. A meal cannot have 0 or negative calories."));
+                    .contains("Oops! Calories must be between 1 and 100,000 kcal."));
         } finally {
             System.setOut(originalOut);
         }

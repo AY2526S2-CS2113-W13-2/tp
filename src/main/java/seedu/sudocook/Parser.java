@@ -275,18 +275,22 @@ public class Parser {
         int time;
         int calories;
         try {
-            time = Integer.parseInt(timeInput);
-            calories = Integer.parseInt(calorieInput);
-            if (time < 0) {
-                Ui.printError("Time cannot be negative.");
+            long timeLong = Long.parseLong(timeInput);
+            long calorieLong = Long.parseLong(calorieInput);
+
+            if (timeLong < 1 || timeLong > 100000) {
+                Ui.printError("Time must be between 1 and 100,000 minutes.");
                 return new Command(false);
             }
-            if (calories <= 0) {
-                Ui.printError("Calories must be a positive number. A meal cannot have 0 or negative calories.");
+            if (calorieLong < 1 || calorieLong > 100000) {
+                Ui.printError("Calories must be between 1 and 100,000 kcal.");
                 return new Command(false);
             }
+
+            time = (int) timeLong;
+            calories = (int) calorieLong;
         } catch (NumberFormatException e) {
-            Ui.printError("Invalid add-r format. Time and calories should be integers.");
+            Ui.printError("Invalid add-r format. Time and calories must be integers between 1 and 100,000.");
             logger.log(Level.INFO, "Caught invalid add-r command format in numeric fields");
             return new Command(false);
         }
