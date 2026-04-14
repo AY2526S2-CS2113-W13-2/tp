@@ -1187,9 +1187,10 @@ to work immediately without manual setup, and the performance overhead is neglig
 ## Product scope
 ### Target user profile
 
-A single student living independently (e.g., in a campus dorm) who types fast and prefers
-keyboard-driven workflows over mouse/touch input. This student enjoys cooking but often gets
-frustrated by disorganised ingredients and indecision about what to cook.
+An **English-speaking single student living independently** (e.g., in campus dorms or
+small apartments) who types fast and prefers keyboard-driven workflows over mouse/touch input. 
+This student enjoys cooking but often gets frustrated by disorganized ingredients and 
+indecision about what to cook.
 
 ### Value proposition
 

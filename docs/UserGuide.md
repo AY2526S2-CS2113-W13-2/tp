@@ -8,7 +8,7 @@ recipes and kitchen inventory efficiently through an intuitive text interface.
 
 ### Target Audience
 
-SudoCook is specifically designed for **single students living independently** (e.g., in campus dorms or
+SudoCook is specifically designed for **English-speaking single students living independently** (e.g., in campus dorms or
 small apartments) who are fast typists and prefer keyboard-driven workflows. It is ideal for those who 
 enjoy cooking but often struggle with disorganized ingredients or difficulty deciding what to eat.
 
