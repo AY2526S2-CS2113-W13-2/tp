@@ -71,7 +71,7 @@ Oops! Invalid add-r format. Use: add-r NAME i/INGREDIENTS s/STEPS t/TIME c/CALOR
 
 Expected output (invalid integer):
 ```
-Oops! Invalid add-r format. Time and calories should be integers.
+Oops! Invalid add-r format. Time and calories must be integers between 1 and 100,000.
 ```
 
 Expected output (invalid ingredient quantity):
@@ -422,6 +422,11 @@ Expected output (invalid N):
 Oops! Missing count must be a positive number.
 ```
 
+Expected output (invalid recommend-r format):
+```
+Oops! Invalid format. Use: recommend-r n/INGREDIENT_NAME, recommend-r missing/N, or recommend-r
+```
+
 ---
 
 ### Deleting a recipe: `delete-r`
@@ -447,7 +452,7 @@ Recipe 1 deleted successfully.
 
 Expected output (index out of range):
 ```
-Invalid index: Index 5 is out of range. (Valid range: 1 to 3)
+Oops! Invalid index: Index 5 is out of range. (Valid range: 1 to 3)
 ```
 
 Expected output (non-numeric index):
@@ -464,8 +469,8 @@ Filters recipes by maximum preparation time and/or maximum calorie count.
 Format: `filter-r [t/MAX_TIME] [c/MAX_CALORIES]`
 
 * At least one of `t/MAX_TIME` or `c/MAX_CALORIES` must be provided.
-* `MAX_TIME` is the maximum preparation time in minutes (non-negative integer between 1 and 100,000).
-* `MAX_CALORIES` is the maximum calorie count in kcal (non-negative integer between 1 and 100,000).
+* `MAX_TIME` is the maximum preparation time in minutes (non-negative integer between 1 and 100,000). A value of `0` is treated as no upper bound for time.
+* `MAX_CALORIES` is the maximum calorie count in kcal (non-negative integer between 1 and 100,000). A value of `0` is treated as no upper bound for calories.
 * Both filters can be used together to narrow results further.
 
 Examples:
@@ -565,6 +570,11 @@ Oops! Index 5 is out of range. (Valid range: 1 to 2)
 Expected output (no recipes saved):
 ```
 No recipes found.
+```
+
+Expected output (recipe book is empty when INDEX is specified):
+```
+Oops! The recipe book is currently empty.
 ```
 
 ---
