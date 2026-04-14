@@ -651,16 +651,20 @@ The feature involves four main classes:
 **Step-by-step execution:**
 
 1. The user enters `add-i n/<name> q/<quantity> u/<unit> [ex/<date>]`.
-2. `Parser.parse()` detects the `add-i` prefix and uses regex to extract the name, quantity, unit,
-   and optional expiry date fields.
-3. If the expiry date is provided, it is validated against the YYYY-MM-DD format. If invalid, an
-   error is printed and a no-op `Command` is returned.
-4. The quantity is validated to ensure it is a positive number. If invalid, an error is printed
-   and a no-op `Command` is returned.
-5. An `AddIngredientCommand` is constructed with the parsed values.
-6. `SudoCook` detects the command type and calls `cmd.execute(inventory)`.
-7. Inside `execute()`:
+2. `Parser.parse()` detects the `add-i` prefix case-insensitively and uses case-insensitive regex
+  patterns to extract name, quantity, unit, and optional expiry.
+3. If the expiry date is provided, it is validated against `YYYY-MM-DD` and parsed as a real
+  calendar date. If invalid, an error is printed and a no-op `Command` is returned.
+4. The parser validates the ingredient name to allow only alphanumeric characters and spaces.
+5. The parser validates the unit to allow alphabetic words only (`[a-zA-Z]+(?:\\s+[a-zA-Z]+)*`).
+  Inputs such as `???` are rejected.
+6. The quantity is validated to ensure it is a positive number. If invalid, an error is printed
+  and a no-op `Command` is returned.
+7. An `AddIngredientCommand` is constructed with the parsed values.
+8. `SudoCook` detects the command type and calls `cmd.execute(inventory)`.
+9. Inside `execute()`:
     - An `Ingredient` is created with the parsed name, quantity, unit, and optional expiry date.
+   - `Ingredient` normalizes internal whitespace in name and unit (`trim` + collapse repeated spaces).
     - `Inventory.addIngredient(ingredient)` adds the ingredient or merges its expiry/quantity batch
       into an existing ingredient with the same name and unit.
     - A success message is printed via `Ui.printMessage()`.
@@ -1123,9 +1127,11 @@ The feature involves four main classes:
 3. `SudoCook` detects the command type and calls `cmd.execute(history, recipes, inventory)`.
 4. Inside `execute()`:
     - `CommandHistory.canUndo()` checks if there are any saved snapshots.
-  - If no snapshots exist, `Ui.printError("No commands to undo.")` is called.
-  - If snapshots exist, `CommandHistory.undo(recipes, inventory)` restores both states in place.
+    - If no snapshots exist, `Ui.printError("No commands to undo.")` is called.
+    - If snapshots exist, `CommandHistory.undo(recipes, inventory)` restores both states in place.
     - A success message is printed via `Ui.printMessage()`.
+5. In `SudoCook`, parser no-op commands (`new Command(false)`) are ignored and do not execute,
+   and therefore do not create undo snapshots.
 
 Key snippet from `UndoCommand`:
 

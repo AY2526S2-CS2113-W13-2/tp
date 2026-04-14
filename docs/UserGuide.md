@@ -162,6 +162,10 @@ Format: `add-i n/NAME q/QUANTITY u/UNIT [ex/YYYY-MM-DD]`
 * `q/QUANTITY` is the amount of the ingredient (can be decimal, e.g., 2.5).
 * `u/UNIT` is the unit of measurement (e.g., cups, grams, pcs).
 * `ex/YYYY-MM-DD` is optional. If provided, sets the expiry date for the ingredient. Use format YYYY-MM-DD.
+* The command keyword and prefixes are case-insensitive (e.g., `ADD-I N/Salt Q/1 U/g EX/2026-01-01`).
+* `NAME` must be alphanumeric (letters/digits/spaces only).
+* `UNIT` must contain alphabetic words only (e.g., `g`, `pcs`, `big cup`). Symbols like `???` are rejected.
+* If expiry is provided, it must be a valid calendar date in `YYYY-MM-DD` format.
 * If an ingredient with the same name and unit already exists, the new amount is added to that
   ingredient. If the expiry date is different, SudoCook stores it as a separate expiry/quantity
   batch instead of overwriting the old expiry.
@@ -190,6 +194,11 @@ Oops! Invalid expiry date format. Use: YYYY-MM-DD
 Expected output (missing required field):
 ```
 Oops! Invalid add-i format. Use: add-i n/NAME q/QUANTITY u/UNIT [ex/YYYY-MM-DD]
+```
+
+Expected output (invalid unit):
+```
+Oops! Invalid unit format. Use alphabetic units only (e.g., grams, cups, pcs).
 ```
 
 ---
@@ -697,6 +706,7 @@ Format: `undo`
 * Up to 50 command snapshots are stored. Commands beyond the 50th are not recoverable.
 * Use `undo` multiple times to undo multiple commands in sequence.
 * The `help` command and read-only commands (like `list-i`, `search-r`) cannot be undone.
+* Invalid or unrecognized commands do not create undo snapshots.
 
 Examples:
 
