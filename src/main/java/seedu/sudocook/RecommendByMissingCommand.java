@@ -51,7 +51,8 @@ public class RecommendByMissingCommand extends Command {
             }
             if (availableInRequiredUnit < required.getQuantity()) {
                 double shortfall = required.getQuantity() - availableInRequiredUnit;
-                String formatted = required.getName() + " (" + Ui.formatQuantity(shortfall) + " " + required.getUnit() + ")";
+                String shortfallStr = Ui.formatQuantity(shortfall) + " " + required.getUnit();
+                String formatted = required.getName() + " (" + shortfallStr + ")";
                 missing.add(formatted);
             }
         }
